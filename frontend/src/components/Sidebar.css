@@ -1,0 +1,767 @@
+/* =========================================================
+   SMART API GUARD
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+  width: 252px;
+  min-width: 252px;
+  flex: 0 0 252px;
+
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  position: relative;
+  z-index: 20;
+
+  padding: 24px 16px 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.98),
+      rgba(7, 11, 20, 0.99)
+    );
+
+  border-right:
+    1px solid rgba(148, 163, 184, 0.13);
+
+  box-shadow:
+    10px 0 35px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================================================
+   TOP
+   ========================================================= */
+
+.sidebar-top {
+  width: 100%;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 4px 7px 26px;
+}
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(59, 130, 246, 0.2),
+      rgba(99, 102, 241, 0.1)
+    );
+
+  border:
+    1px solid rgba(96, 165, 250, 0.2);
+
+  color: #60a5fa;
+
+  font-size: 22px;
+
+  box-shadow:
+    0 8px 25px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.brand-logo span {
+  line-height: 1;
+
+  filter:
+    drop-shadow(
+      0 0 8px rgba(96, 165, 250, 0.35)
+    );
+}
+
+.brand-copy {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.brand-copy strong {
+  color: #f8fafc;
+
+  font-size: 12px;
+  font-weight: 850;
+
+  letter-spacing: -0.2px;
+
+  white-space: nowrap;
+}
+
+.brand-copy small {
+  color: #64748b;
+
+  font-size: 8px;
+  font-weight: 600;
+
+  letter-spacing: 0.15px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
+
+.sidebar-section-title {
+  padding: 0 10px 10px;
+
+  color: #475569;
+
+  font-size: 7px;
+  font-weight: 900;
+
+  letter-spacing: 1.8px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.sidebar-nav .nav-item {
+  width: 100%;
+
+  min-height: 62px;
+
+  display: flex;
+  align-items: center;
+
+  position: relative;
+
+  padding: 10px 12px;
+
+  border: 1px solid transparent;
+  border-radius: 13px;
+
+  background: transparent;
+
+  color: #94a3b8;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.sidebar-nav .nav-item:hover {
+  color: #e2e8f0;
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  border-color:
+    rgba(148, 163, 184, 0.08);
+
+  transform: translateX(2px);
+}
+
+.sidebar-nav .nav-item.active {
+  color: #f8fafc;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(59, 130, 246, 0.16),
+      rgba(99, 102, 241, 0.07)
+    );
+
+  border-color:
+    rgba(96, 165, 250, 0.17);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 7px 20px rgba(37, 99, 235, 0.06);
+}
+
+
+/* =========================================================
+   NAV ICON
+   ========================================================= */
+
+.nav-icon {
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background:
+    rgba(148, 163, 184, 0.055);
+
+  color: #64748b;
+
+  font-size: 16px;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.nav-item:hover .nav-icon {
+  color: #cbd5e1;
+
+  background:
+    rgba(148, 163, 184, 0.09);
+
+  transform: scale(1.03);
+}
+
+.nav-item.active .nav-icon {
+  color: #60a5fa;
+
+  background:
+    rgba(59, 130, 246, 0.13);
+
+  box-shadow:
+    0 0 18px rgba(59, 130, 246, 0.08);
+}
+
+
+/* =========================================================
+   NAV CONTENT
+   ========================================================= */
+
+.nav-content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  margin-left: 12px;
+}
+
+.nav-label {
+  color: inherit;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  line-height: 1.2;
+}
+
+.nav-description {
+  color: #475569;
+
+  font-size: 8px;
+  font-weight: 550;
+
+  line-height: 1.2;
+
+  transition: color 0.25s ease;
+}
+
+.nav-item:hover .nav-description {
+  color: #64748b;
+}
+
+.nav-item.active .nav-description {
+  color: #64748b;
+}
+
+
+/* =========================================================
+   ACTIVE INDICATOR
+   ========================================================= */
+
+.nav-active-indicator {
+  width: 3px;
+  height: 22px;
+
+  position: absolute;
+
+  right: -17px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #60a5fa,
+      #6366f1
+    );
+
+  box-shadow:
+    0 0 12px rgba(96, 165, 250, 0.65);
+
+  opacity: 0;
+
+  transform: scaleY(0.5);
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.nav-item.active .nav-active-indicator {
+  opacity: 1;
+
+  transform: scaleY(1);
+}
+
+
+/* =========================================================
+   SIDEBAR BOTTOM
+   ========================================================= */
+
+.sidebar-bottom {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 13px;
+
+  padding-top: 20px;
+}
+
+
+/* =========================================================
+   SYSTEM STATUS
+   ========================================================= */
+
+.system-status {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 13px 12px;
+
+  border:
+    1px solid rgba(148, 163, 184, 0.12);
+
+  border-radius: 13px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.system-status:hover {
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  border-color:
+    rgba(148, 163, 184, 0.17);
+}
+
+
+/* =========================================================
+   STATUS DOT
+   ========================================================= */
+
+.system-dot {
+  width: 8px;
+  height: 8px;
+
+  flex: 0 0 8px;
+
+  border-radius: 50%;
+}
+
+.system-dot.online {
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 3px rgba(34, 197, 94, 0.09),
+    0 0 12px rgba(34, 197, 94, 0.7);
+}
+
+.system-dot.offline {
+  background: #ef4444;
+
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.09),
+    0 0 12px rgba(239, 68, 68, 0.6);
+}
+
+
+/* =========================================================
+   STATUS COPY
+   ========================================================= */
+
+.system-copy {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.system-copy strong {
+  color: #e2e8f0;
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.system-copy small {
+  color: #475569;
+
+  font-size: 7px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   ONLINE PULSE
+   ========================================================= */
+
+.status-pulse {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 6px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 8px rgba(34, 197, 94, 0.75);
+
+  animation:
+    sidebarStatusPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sidebarStatusPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(0.78);
+  }
+}
+
+
+/* =========================================================
+   OFFLINE STATE
+   ========================================================= */
+
+.system-status:has(.system-dot.offline) {
+  border-color:
+    rgba(239, 68, 68, 0.16);
+
+  background:
+    rgba(239, 68, 68, 0.025);
+}
+
+.system-status:has(.system-dot.online) {
+  border-color:
+    rgba(34, 197, 94, 0.13);
+
+  background:
+    rgba(34, 197, 94, 0.018);
+}
+
+
+/* =========================================================
+   VERSION
+   ========================================================= */
+
+.version {
+  padding: 0 4px;
+
+  color: #334155;
+
+  font-size: 7px;
+  font-weight: 700;
+
+  letter-spacing: 0.65px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   LIGHT MODE
+   ========================================================= */
+
+html:not(.dark) .sidebar {
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff,
+      #f8fafc
+    );
+
+  border-right-color:
+    rgba(15, 23, 42, 0.1);
+
+  box-shadow:
+    8px 0 30px rgba(15, 23, 42, 0.05);
+}
+
+html:not(.dark) .brand-copy strong {
+  color: #0f172a;
+}
+
+html:not(.dark) .brand-copy small {
+  color: #64748b;
+}
+
+html:not(.dark) .sidebar-section-title {
+  color: #94a3b8;
+}
+
+html:not(.dark) .sidebar-nav .nav-item {
+  color: #64748b;
+}
+
+html:not(.dark) .sidebar-nav .nav-item:hover {
+  color: #334155;
+
+  background:
+    rgba(15, 23, 42, 0.035);
+
+  border-color:
+    rgba(15, 23, 42, 0.06);
+}
+
+html:not(.dark) .sidebar-nav .nav-item.active {
+  color: #1d4ed8;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(59, 130, 246, 0.1),
+      rgba(99, 102, 241, 0.045)
+    );
+
+  border-color:
+    rgba(59, 130, 246, 0.14);
+}
+
+html:not(.dark) .nav-icon {
+  color: #64748b;
+
+  background:
+    rgba(15, 23, 42, 0.045);
+}
+
+html:not(.dark) .nav-item.active .nav-icon {
+  color: #2563eb;
+
+  background:
+    rgba(59, 130, 246, 0.1);
+}
+
+html:not(.dark) .nav-description {
+  color: #94a3b8;
+}
+
+html:not(.dark) .nav-item.active .nav-description {
+  color: #64748b;
+}
+
+html:not(.dark) .system-status {
+  background:
+    rgba(15, 23, 42, 0.025);
+
+  border-color:
+    rgba(15, 23, 42, 0.09);
+}
+
+html:not(.dark) .system-copy strong {
+  color: #334155;
+}
+
+html:not(.dark) .system-copy small {
+  color: #64748b;
+}
+
+html:not(.dark) .version {
+  color: #94a3b8;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 950px) {
+  .sidebar {
+    width: 225px;
+    min-width: 225px;
+    flex-basis: 225px;
+  }
+
+  .nav-content {
+    margin-left: 10px;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar *,
+  .sidebar *::before,
+  .sidebar *::after {
+    animation: none !important;
+
+    transition: none !important;
+  }
+}
+/* =========================================================
+   BRAND ANIMATION FIX
+   ========================================================= */
+
+.monitor-brand-core {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  flex: 0 0 74px;
+
+  display: grid;
+  place-items: center;
+
+  isolation: isolate;
+
+  perspective: 500px;
+}
+
+
+/* Keep animation layers visible */
+.brand-core-frame,
+.brand-core-orbit,
+.brand-core-particles,
+.brand-core-scan {
+  pointer-events: none;
+}
+
+
+/* Main logo breathing */
+.brand-core-frame {
+  animation:
+    brandCoreFloat 4s ease-in-out infinite,
+    brandCoreGlow 4s ease-in-out infinite;
+}
+
+
+/* Orbit must actually rotate */
+.brand-core-orbit.orbit-one {
+  animation:
+    brandOrbitOne 8s linear infinite;
+}
+
+.brand-core-orbit.orbit-two {
+  animation:
+    brandOrbitTwo 12s linear infinite;
+}
+
+
+/* Extra subtle logo glow */
+@keyframes brandCoreGlow {
+
+  0%,
+  100% {
+    filter:
+      drop-shadow(
+        0 0 0
+        rgba(90, 190, 220, 0)
+      );
+  }
+
+  50% {
+    filter:
+      drop-shadow(
+        0 0 10px
+        rgba(90, 190, 220, 0.22)
+      );
+  }
+}
+
+
+/* Make particles visible */
+.brand-core-particles i {
+  opacity: 0.45;
+}
+
+
+/* Scan beam */
+.brand-core-scan {
+  animation:
+    brandScan 4.8s ease-in-out infinite;
+}
+
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .monitor-brand-core *,
+  .monitor-brand-core *::before,
+  .monitor-brand-core *::after {
+    animation: none !important;
+  }
+
+}

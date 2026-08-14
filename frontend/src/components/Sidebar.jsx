@@ -1,4 +1,10 @@
-function Sidebar({ activePage, setActivePage }) {
+
+
+function Sidebar({
+  activePage,
+  setActivePage,
+  online,
+}) {
   const items = [
     {
       id: "dashboard",
@@ -29,7 +35,10 @@ function Sidebar({ activePage, setActivePage }) {
   return (
     <aside className="sidebar">
 
-      {/* BRAND */}
+      {/* ================================================
+          BRAND
+      ================================================= */}
+
       <div className="sidebar-top">
 
         <div className="brand">
@@ -39,72 +48,115 @@ function Sidebar({ activePage, setActivePage }) {
           </div>
 
           <div className="brand-copy">
-            <strong>Smart API Guard</strong>
-            <small>API Security Platform</small>
+            <strong>
+              Smart API Guard
+            </strong>
+
+            <small>
+              API Security Platform
+            </small>
           </div>
 
         </div>
 
-        {/* SECTION TITLE */}
+        {/* ==============================================
+            SECTION TITLE
+        ============================================== */}
+
         <div className="sidebar-section-title">
           PLATFORM
         </div>
 
-        {/* NAVIGATION */}
+        {/* ==============================================
+            NAVIGATION
+        ============================================== */}
+
         <nav className="sidebar-nav">
 
-          {items.map((item) => (
+          {items.map((item) => {
+            const isActive =
+              activePage === item.id;
 
-            <button
-              key={item.id}
-              type="button"
-              className={
-                activePage === item.id
-                  ? "nav-item active"
-                  : "nav-item"
-              }
-              onClick={() => setActivePage(item.id)}
-            >
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={
+                  isActive
+                    ? "nav-item active"
+                    : "nav-item"
+                }
+                onClick={() =>
+                  setActivePage(item.id)
+                }
+                aria-current={
+                  isActive
+                    ? "page"
+                    : undefined
+                }
+              >
 
-              <span className="nav-icon">
-                {item.icon}
-              </span>
-
-              <span className="nav-content">
-
-                <span className="nav-label">
-                  {item.label}
+                <span className="nav-icon">
+                  {item.icon}
                 </span>
 
-                <span className="nav-description">
-                  {item.description}
+                <span className="nav-content">
+
+                  <span className="nav-label">
+                    {item.label}
+                  </span>
+
+                  <span className="nav-description">
+                    {item.description}
+                  </span>
+
                 </span>
 
-              </span>
+                <span className="nav-active-indicator" />
 
-              <span className="nav-active-indicator"></span>
-
-            </button>
-
-          ))}
+              </button>
+            );
+          })}
 
         </nav>
 
       </div>
 
-      {/* BOTTOM */}
+      {/* ================================================
+          BOTTOM STATUS
+      ================================================= */}
+
       <div className="sidebar-bottom">
 
         <div className="system-status">
 
-          <span className="system-dot"></span>
+          {/* DYNAMIC STATUS DOT */}
+          <span
+            className={`system-dot ${
+              online
+                ? "online"
+                : "offline"
+            }`}
+          />
 
           <div className="system-copy">
-            <strong>API Online</strong>
-            <small>localhost:8080</small>
+
+            <strong>
+              {online
+                ? "API Online"
+                : "API Offline"}
+            </strong>
+
+            <small>
+              localhost:8080
+            </small>
+
           </div>
 
-          <span className="status-pulse"></span>
+          {/* ONLY SHOW PULSE WHEN ONLINE */}
+          {online && (
+            <span className="status-pulse" />
+          )}
 
         </div>
 
@@ -118,4 +170,4 @@ function Sidebar({ activePage, setActivePage }) {
   );
 }
 
-export default Sidebar;     
+export default Sidebar;

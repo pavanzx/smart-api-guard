@@ -1,0 +1,469 @@
+/* =====================================================
+   SMART API GUARD
+   PLATFORM GUIDE
+   ===================================================== */
+
+.platform-guide {
+  position: relative;
+  width: 100%;
+  padding: 110px 5vw 130px;
+  overflow: hidden;
+
+  color: #2f3328;
+
+  background:
+    radial-gradient(
+      circle at 12% 20%,
+      rgba(82, 110, 255, 0.055),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 88% 70%,
+      rgba(82, 110, 255, 0.045),
+      transparent 28%
+    ),
+    #eee9dc;
+}
+
+/* =====================================================
+   HEADING
+   ===================================================== */
+
+.platform-guide-heading {
+  width: min(720px, 100%);
+  margin: 0 auto 110px;
+  text-align: center;
+}
+
+.platform-guide-eyebrow {
+  display: inline-block;
+  margin-bottom: 18px;
+
+  color: #6676b8;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.platform-guide-heading h2 {
+  margin: 0;
+
+  color: #30342a;
+
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 750;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+}
+
+.platform-guide-heading h2 span {
+  color: #6476bd;
+}
+
+.platform-guide-heading p {
+  max-width: 580px;
+  margin: 25px auto 0;
+
+  color: rgba(47, 51, 40, 0.58);
+
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* =====================================================
+   LIST
+   ===================================================== */
+
+.platform-guide-list {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 150px;
+}
+
+/* =====================================================
+   ITEM
+   ===================================================== */
+
+.platform-guide-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(45px, 8vw, 120px);
+
+  opacity: 0;
+  transform: translateY(70px);
+
+  transition:
+    opacity 0.9s ease,
+    transform 1s cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+
+.platform-guide-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =====================================================
+   ALTERNATING DIRECTION
+   ===================================================== */
+
+.platform-guide-item.image-right .platform-guide-image-wrap {
+  order: 2;
+}
+
+.platform-guide-item.image-right .platform-guide-content {
+  order: 1;
+}
+
+.platform-guide-item.image-left .platform-guide-image-wrap {
+  order: 1;
+}
+
+.platform-guide-item.image-left .platform-guide-content {
+  order: 2;
+}
+
+/* =====================================================
+   IMAGE
+   ===================================================== */
+
+.platform-guide-image-wrap {
+  position: relative;
+}
+
+.platform-guide-image-frame {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 1.25;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(65, 70, 55, 0.12);
+  border-radius: 28px;
+
+  background: #ddd8c9;
+
+  box-shadow:
+    0 25px 70px rgba(55, 58, 45, 0.12),
+    0 2px 5px rgba(55, 58, 45, 0.05);
+
+  clip-path: inset(0 100% 0 0 round 28px);
+
+  transition:
+    clip-path 1.2s cubic-bezier(0.77, 0, 0.18, 1),
+    transform 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.image-right .platform-guide-image-frame {
+  clip-path: inset(0 0 0 100% round 28px);
+}
+
+.is-visible .platform-guide-image-frame {
+  clip-path: inset(0 0 0 0 round 28px);
+}
+
+.platform-guide-image-frame:hover {
+  transform: translateY(-7px);
+
+  box-shadow:
+    0 35px 90px rgba(55, 58, 45, 0.17),
+    0 4px 10px rgba(55, 58, 45, 0.06);
+}
+
+.platform-guide-image-frame img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  filter:
+    saturate(0.72)
+    contrast(0.94);
+
+  transform: scale(1.04);
+
+  transition:
+    transform 1.2s ease,
+    filter 0.5s ease;
+}
+
+.platform-guide-image-frame:hover img {
+  transform: scale(1.08);
+
+  filter:
+    saturate(0.85)
+    contrast(0.98);
+}
+
+.platform-guide-image-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(239, 234, 220, 0.16),
+      transparent 45%
+    ),
+    linear-gradient(
+      to top,
+      rgba(30, 34, 28, 0.2),
+      transparent 45%
+    );
+
+  pointer-events: none;
+}
+
+/* =====================================================
+   IMAGE NUMBER
+   ===================================================== */
+
+.platform-guide-image-number {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+
+  display: grid;
+  place-items: center;
+
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+
+  background: rgba(239, 234, 220, 0.2);
+
+  backdrop-filter: blur(12px);
+
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* =====================================================
+   CONTENT
+   ===================================================== */
+
+.platform-guide-content {
+  max-width: 470px;
+}
+
+.platform-guide-number {
+  display: block;
+  margin-bottom: 22px;
+
+  color: rgba(100, 118, 189, 0.65);
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.platform-guide-label {
+  display: block;
+  margin-bottom: 10px;
+
+  color: rgba(47, 51, 40, 0.42);
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.platform-guide-content h3 {
+  margin: 0;
+
+  color: #30342a;
+
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 750;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.platform-guide-content p {
+  max-width: 440px;
+  margin: 24px 0 0;
+
+  color: rgba(47, 51, 40, 0.58);
+
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+/* =====================================================
+   DECORATIVE LINE
+   ===================================================== */
+
+.platform-guide-line {
+  position: relative;
+
+  width: 170px;
+  height: 1px;
+
+  margin-top: 32px;
+
+  overflow: hidden;
+
+  background: rgba(47, 51, 40, 0.12);
+}
+
+.platform-guide-line span {
+  position: absolute;
+  inset: 0;
+
+  width: 45%;
+
+  background: #6676b8;
+
+  transform: translateX(-120%);
+
+  transition:
+    transform 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s;
+}
+
+.is-visible .platform-guide-line span {
+  transform: translateX(0);
+}
+
+/* =====================================================
+   SOFT BLUE AMBIENT DETAIL
+   ===================================================== */
+
+.platform-guide::before {
+  content: "";
+
+  position: absolute;
+
+  width: 420px;
+  height: 420px;
+
+  top: 35%;
+  right: -220px;
+
+  border-radius: 50%;
+
+  background: rgba(94, 116, 190, 0.055);
+
+  filter: blur(60px);
+
+  pointer-events: none;
+}
+
+.platform-guide::after {
+  content: "";
+
+  position: absolute;
+
+  width: 300px;
+  height: 300px;
+
+  left: -170px;
+  bottom: 10%;
+
+  border-radius: 50%;
+
+  background: rgba(94, 116, 190, 0.045);
+
+  filter: blur(55px);
+
+  pointer-events: none;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 850px) {
+  .platform-guide {
+    padding: 80px 24px 100px;
+  }
+
+  .platform-guide-heading {
+    margin-bottom: 75px;
+  }
+
+  .platform-guide-list {
+    gap: 100px;
+  }
+
+  .platform-guide-item,
+  .platform-guide-item.image-right,
+  .platform-guide-item.image-left {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .platform-guide-item.image-right .platform-guide-image-wrap,
+  .platform-guide-item.image-right .platform-guide-content,
+  .platform-guide-item.image-left .platform-guide-image-wrap,
+  .platform-guide-item.image-left .platform-guide-content {
+    order: initial;
+  }
+
+  .platform-guide-content {
+    max-width: 620px;
+  }
+
+  .platform-guide-image-frame,
+  .image-right .platform-guide-image-frame {
+    clip-path: inset(0 0 0 0 round 22px);
+  }
+}
+
+@media (max-width: 600px) {
+  .platform-guide {
+    padding: 65px 18px 80px;
+  }
+
+  .platform-guide-heading h2 {
+    font-size: 42px;
+  }
+
+  .platform-guide-heading p {
+    font-size: 13px;
+  }
+
+  .platform-guide-list {
+    gap: 80px;
+  }
+
+  .platform-guide-image-frame {
+    border-radius: 20px;
+  }
+
+  .platform-guide-content h3 {
+    font-size: 34px;
+  }
+
+  .platform-guide-content p {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platform-guide-item,
+  .platform-guide-image-frame,
+  .platform-guide-image-frame img,
+  .platform-guide-line span {
+    transition: none !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  .platform-guide-item {
+    opacity: 1;
+  }
+}

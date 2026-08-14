@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -33,14 +34,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        // =========================================
+        // =====================================================
         // CORS
-        // =========================================
+        // =====================================================
 
-        response.setHeader(
-                "Access-Control-Allow-Origin",
-                "http://localhost:5173"
-        );
+        String origin = request.getHeader("Origin");
+
+        if ("http://localhost:5178".equals(origin)
+                || "http://localhost:5173".equals(origin)) {
+
+            response.setHeader(
+                    "Access-Control-Allow-Origin",
+                    origin
+            );
+        }
 
         response.setHeader(
                 "Access-Control-Allow-Methods",
@@ -49,7 +56,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         response.setHeader(
                 "Access-Control-Allow-Headers",
-                "X-API-KEY, Content-Type"
+                "X-API-KEY, Content-Type, Accept"
         );
 
         response.setHeader(
@@ -57,9 +64,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 "X-RateLimit-Limit, X-RateLimit-Remaining, X-API-Tier"
         );
 
-        // =========================================
+        response.setHeader(
+                "Vary",
+                "Origin"
+        );
+
+        // =====================================================
         // CORS PREFLIGHT
-        // =========================================
+        // =====================================================
 
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
 
@@ -70,54 +82,130 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
+        // =====================================================
+        // REQUEST INFORMATION
+        // =====================================================
+
         String endpoint =
                 request.getRequestURI();
 
         String method =
                 request.getMethod();
 
-        // =========================================
-        // ALLOW API KEY CREATION
-        // =========================================
+        // =====================================================
+        // CREATE API KEY
+        // =====================================================
         //
-        // The first API key cannot be created if
-        // this endpoint itself requires an API key.
+        // POST /api/keys does not require an API key.
         //
-        // Therefore:
-        //
-        // POST /api/keys
-        //
-        // bypasses authentication.
+        // However, we still capture the actual response status
+        // so 200 / 201 / 400 / 409 / 500 etc. are logged.
         //
 
         if ("/api/keys".equals(endpoint)
                 && "POST".equalsIgnoreCase(method)) {
 
-            filterChain.doFilter(
-                    request,
-                    response
-            );
+            StatusCaptureResponseWrapper wrappedResponse =
+                    new StatusCaptureResponseWrapper(response);
+
+            try {
+
+                filterChain.doFilter(
+                        request,
+                        wrappedResponse
+                );
+
+            } finally {
+
+                int finalStatus =
+                        wrappedResponse.getStatus();
+
+                boolean allowed =
+                        finalStatus >= 200
+                                && finalStatus < 400;
+
+                apiUsageService.logRequest(
+                        "PUBLIC",
+                        endpoint,
+                        finalStatus,
+                        allowed
+                );
+            }
 
             return;
         }
 
-        // =========================================
-        // API KEY
-        // =========================================
+        // =====================================================
+        // VALIDATE API KEY
+        // =====================================================
+        //
+        // GET /api/keys/validate is handled directly by the
+        // controller.
+        //
+        // We do NOT apply rate limiting here.
+        //
+        // But we DO capture the actual response status.
+        //
+
+        if ("/api/keys/validate".equals(endpoint)
+                && "GET".equalsIgnoreCase(method)) {
+
+            String validationKey =
+                    request.getHeader("X-API-KEY");
+
+            String usageKey =
+                    (validationKey == null
+                            || validationKey.isBlank())
+                            ? "UNKNOWN"
+                            : validationKey;
+
+            StatusCaptureResponseWrapper wrappedResponse =
+                    new StatusCaptureResponseWrapper(response);
+
+            try {
+
+                filterChain.doFilter(
+                        request,
+                        wrappedResponse
+                );
+
+            } finally {
+
+                int finalStatus =
+                        wrappedResponse.getStatus();
+
+                boolean allowed =
+                        finalStatus >= 200
+                                && finalStatus < 400;
+
+                apiUsageService.logRequest(
+                        usageKey,
+                        endpoint,
+                        finalStatus,
+                        allowed
+                );
+            }
+
+            return;
+        }
+
+        // =====================================================
+        // READ API KEY
+        // =====================================================
 
         String apiKey =
                 request.getHeader("X-API-KEY");
 
-        // =========================================
+        // =====================================================
         // MISSING API KEY
-        // =========================================
+        // =====================================================
 
         if (apiKey == null || apiKey.isBlank()) {
 
             apiUsageService.logRequest(
                     "UNKNOWN",
                     endpoint,
-                    401,
+                    HttpServletResponse.SC_UNAUTHORIZED,
                     false
             );
 
@@ -136,25 +224,25 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        // =========================================
-        // CHECK RATE LIMIT
-        // =========================================
+        // =====================================================
+        // RATE LIMIT CHECK
+        // =====================================================
 
         RateLimitResult result =
                 rateLimiterService.checkRequest(
                         apiKey
                 );
 
-        // =========================================
-        // UNKNOWN / INVALID API KEY
-        // =========================================
+        // =====================================================
+        // INVALID API KEY
+        // =====================================================
 
         if ("UNKNOWN".equals(result.tier())) {
 
             apiUsageService.logRequest(
                     apiKey,
                     endpoint,
-                    401,
+                    HttpServletResponse.SC_UNAUTHORIZED,
                     false
             );
 
@@ -173,22 +261,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        // =========================================
+        // =====================================================
         // RATE LIMIT HEADERS
-        // =========================================
+        // =====================================================
 
         response.setHeader(
                 "X-RateLimit-Limit",
-                String.valueOf(
-                        result.limit()
-                )
+                String.valueOf(result.limit())
         );
 
         response.setHeader(
                 "X-RateLimit-Remaining",
-                String.valueOf(
-                        result.remaining()
-                )
+                String.valueOf(result.remaining())
         );
 
         response.setHeader(
@@ -196,9 +280,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 result.tier()
         );
 
-        // =========================================
+        // =====================================================
         // RATE LIMIT EXCEEDED
-        // =========================================
+        // =====================================================
 
         if (!result.allowed()) {
 
@@ -209,8 +293,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     false
             );
 
-            // Do NOT use SC_TOO_MANY_REQUESTS.
-            // It is not available in your Servlet version.
             response.setStatus(429);
 
             response.setContentType(
@@ -224,20 +306,123 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        // =========================================
+        // =====================================================
         // REQUEST ALLOWED
-        // =========================================
+        // =====================================================
+        //
+        // Capture the actual final status returned by Spring.
+        //
 
-        apiUsageService.logRequest(
-                apiKey,
-                endpoint,
-                200,
-                true
-        );
+        StatusCaptureResponseWrapper wrappedResponse =
+                new StatusCaptureResponseWrapper(response);
 
-        filterChain.doFilter(
-                request,
-                response
-        );
+        try {
+
+            filterChain.doFilter(
+                    request,
+                    wrappedResponse
+            );
+
+        } finally {
+
+            int finalStatus =
+                    wrappedResponse.getStatus();
+
+            boolean allowed =
+                    finalStatus >= 200
+                            && finalStatus < 400;
+
+            apiUsageService.logRequest(
+                    apiKey,
+                    endpoint,
+                    finalStatus,
+                    allowed
+            );
+        }
+    }
+
+    // =====================================================
+    // STATUS CAPTURE RESPONSE WRAPPER
+    // =====================================================
+
+    private static class StatusCaptureResponseWrapper
+            extends HttpServletResponseWrapper {
+
+        private int httpStatus =
+                HttpServletResponse.SC_OK;
+
+        public StatusCaptureResponseWrapper(
+                HttpServletResponse response) {
+
+            super(response);
+        }
+
+        // =====================================================
+        // SET STATUS
+        // =====================================================
+
+        @Override
+        public void setStatus(int status) {
+
+            this.httpStatus = status;
+
+            super.setStatus(status);
+        }
+
+        // =====================================================
+        // SEND ERROR
+        // =====================================================
+
+        @Override
+        public void sendError(int status)
+                throws IOException {
+
+            this.httpStatus = status;
+
+            super.sendError(status);
+        }
+
+        // =====================================================
+        // SEND ERROR WITH MESSAGE
+        // =====================================================
+
+        @Override
+        public void sendError(
+                int status,
+                String message)
+                throws IOException {
+
+            this.httpStatus = status;
+
+            super.sendError(
+                    status,
+                    message
+            );
+        }
+
+        // =====================================================
+        // SEND REDIRECT
+        // =====================================================
+
+        @Override
+        public void sendRedirect(
+                String location)
+                throws IOException {
+
+            this.httpStatus =
+                    HttpServletResponse.SC_FOUND;
+
+            super.sendRedirect(location);
+        }
+
+        // =====================================================
+        // GET STATUS
+        // =====================================================
+
+        @Override
+        public int getStatus() {
+
+            return httpStatus;
+        }
     }
 }

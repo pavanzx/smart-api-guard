@@ -1,819 +1,876 @@
 
 import { useEffect, useMemo, useState } from "react";
+import "./ApiKeys.css";
 
-const API_BASE_URL = "http://localhost:8080";
-const API_KEY = "PAVAN-PRO-KEY";
+const initialKeys = [
+  {
+    id: 1,
+    name: "Production Gateway",
+    tier: "PRO",
+    environment: "PRODUCTION",
+    key: "SAG-PAVAN-8F42-XK91",
+    status: "ACTIVE",
+    created: "Today",
+    lastUsed: "2 min ago",
+    requests: 12482,
+  },
+  {
+    id: 2,
+    name: "Development Client",
+    tier: "FREE",
+    environment: "DEVELOPMENT",
+    key: "SAG-DEV42-K8LM-Q731",
+    status: "ACTIVE",
+    created: "Yesterday",
+    lastUsed: "18 min ago",
+    requests: 3421,
+  },
+  {
+    id: 3,
+    name: "Administrative Control",
+    tier: "ADMIN",
+    environment: "LOCAL",
+    key: "SAG-ADM77-XP92-L4Q8",
+    status: "INACTIVE",
+    created: "3 days ago",
+    lastUsed: "Never",
+    requests: 0,
+  },
+];
+
+/* =========================================================
+   API KEY GENERATOR
+========================================================= */
+
+function generateApiKey() {
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  const randomPart = (length) => {
+    let result = "";
+
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(
+        Math.floor(Math.random() * chars.length)
+      );
+    }
+
+    return result;
+  };
+
+  return `SAG-${randomPart(5)}-${randomPart(5)}-${randomPart(5)}`;
+}
+
+/* =========================================================
+   MASK KEY
+========================================================= */
+
+function maskKey(key) {
+  if (!key) {
+    return "";
+  }
+
+  const parts = key.split("-");
+
+  if (parts.length < 2) {
+    return "••••••••••••••••";
+  }
+
+  return `${parts[0]}-••••••••••••-${parts[parts.length - 1]}`;
+}
+
+/* =========================================================
+   API KEYS
+========================================================= */
 
 function ApiKeys() {
-  const [keys, setKeys] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState("");
+  const [keys, setKeys] =
+    useState(initialKeys);
 
-  const [showCreateModal, setShowCreateModal] =
+  const [revealedKeys, setRevealedKeys] =
+    useState({});
+
+  const [copiedId, setCopiedId] =
+    useState(null);
+
+  const [showCreate, setShowCreate] =
     useState(false);
 
-  const [showKeyModal, setShowKeyModal] =
+  const [newKeyName, setNewKeyName] =
+    useState("");
+
+  const [newEnvironment, setNewEnvironment] =
+    useState("PRODUCTION");
+
+  const [newTier, setNewTier] =
+    useState("PRO");
+
+  const [securityPulse, setSecurityPulse] =
     useState(false);
 
-  const [newKeyName, setNewKeyName] = useState("");
-  const [createdKey, setCreatedKey] = useState(null);
+  /* =====================================================
+     KEY COUNTS
+  ===================================================== */
 
-  const [copied, setCopied] = useState(false);
-  const [visibleKeys, setVisibleKeys] = useState({});
-  const [actionId, setActionId] = useState(null);
+  const totalKeys = useMemo(
+    () => keys.length,
+    [keys]
+  );
 
-  // =====================================================
-  // FETCH API KEYS
-  // =====================================================
+  const activeKeys = useMemo(
+    () =>
+      keys.filter(
+        (key) =>
+          key.status === "ACTIVE"
+      ).length,
+    [keys]
+  );
 
-  const fetchKeys = async () => {
-    setLoading(true);
-    setError("");
+  const inactiveKeys = useMemo(
+    () =>
+      keys.filter(
+        (key) =>
+          key.status === "INACTIVE"
+      ).length,
+    [keys]
+  );
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/keys`,
-        {
-          method: "GET",
-          headers: {
-            "X-API-KEY": API_KEY,
-            Accept: "application/json",
-          },
-        }
-      );
+  /* =====================================================
+     TOTAL REQUESTS
+  ===================================================== */
 
-      if (!response.ok) {
-        throw new Error(
-          `Unable to load API keys (${response.status})`
-        );
-      }
+  const totalRequests = useMemo(
+    () =>
+      keys.reduce(
+        (total, key) =>
+          total + (key.requests || 0),
+        0
+      ),
+    [keys]
+  );
 
-      const data = await response.json();
-
-      setKeys(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(
-        "Unable to load API keys:",
-        err
-      );
-
-      setKeys([]);
-
-      setError(
-        "Unable to load API keys. Make sure Spring Boot is running on port 8080."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // =====================================================
-  // INITIAL LOAD
-  // =====================================================
+  /* =====================================================
+     SECURITY CORE ANIMATION
+  ===================================================== */
 
   useEffect(() => {
-    fetchKeys();
+    const interval = setInterval(() => {
+      setSecurityPulse(
+        (value) => !value
+      );
+    }, 2200);
+
+    return () =>
+      clearInterval(interval);
   }, []);
 
-  // =====================================================
-  // COUNTS
-  // =====================================================
+  /* =====================================================
+     CREATE KEY
+  ===================================================== */
 
-  const activeCount = useMemo(
-    () =>
-      keys.filter(
-        (key) => key.active === true
-      ).length,
-    [keys]
-  );
+  const handleCreateKey = () => {
+    const cleanName =
+      newKeyName.trim() ||
+      "New Gateway Key";
 
-  const inactiveCount = useMemo(
-    () =>
-      keys.filter(
-        (key) => key.active !== true
-      ).length,
-    [keys]
-  );
+    const newKey = {
+      id: Date.now(),
+      name: cleanName,
+      tier: newTier,
+      environment: newEnvironment,
+      key: generateApiKey(),
+      status: "ACTIVE",
+      created: "Just now",
+      lastUsed: "Never",
+      requests: 0,
+    };
 
-  // =====================================================
-  // CREATE API KEY
-  // =====================================================
+    setKeys((current) => [
+      newKey,
+      ...current,
+    ]);
 
-  const createApiKey = async (event) => {
-    event.preventDefault();
+    setRevealedKeys((current) => ({
+      ...current,
+      [newKey.id]: true,
+    }));
 
-    const name = newKeyName.trim();
+    setNewKeyName("");
+    setNewEnvironment("PRODUCTION");
+    setNewTier("PRO");
 
-    if (!name) {
-      return;
-    }
+    setShowCreate(false);
+  };
 
-    setCreating(true);
-    setError("");
+  /* =====================================================
+     COPY KEY
+  ===================================================== */
 
+  const handleCopy = async (key) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/keys`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-KEY": API_KEY,
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            name,
-          }),
-        }
+      await navigator.clipboard.writeText(
+        key.key
       );
 
-      const data = await response.json();
+      setCopiedId(key.id);
 
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            "Unable to create API key"
-        );
-      }
-
-      setCreatedKey(data);
-      setNewKeyName("");
-
-      setShowCreateModal(false);
-      setShowKeyModal(true);
-
-      await fetchKeys();
-    } catch (err) {
+      setTimeout(() => {
+        setCopiedId(null);
+      }, 1800);
+    } catch (error) {
       console.error(
-        "Unable to create API key:",
-        err
+        "Unable to copy API key:",
+        error
       );
-
-      setError(
-        err.message ||
-          "Unable to create API key."
-      );
-    } finally {
-      setCreating(false);
     }
   };
 
-  // =====================================================
-  // ACTIVATE / DEACTIVATE
-  // =====================================================
+  /* =====================================================
+     REVEAL / HIDE
+  ===================================================== */
 
-  const toggleKeyStatus = async (key) => {
-    if (!key?.id) {
-      return;
-    }
-
-    setActionId(key.id);
-    setError("");
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/keys/${key.id}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-KEY": API_KEY,
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            active: !key.active,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            "Unable to update API key"
-        );
-      }
-
-      setKeys((currentKeys) =>
-        currentKeys.map((item) =>
-          item.id === key.id ? data : item
-        )
-      );
-    } catch (err) {
-      console.error(
-        "Unable to update API key:",
-        err
-      );
-
-      setError(
-        err.message ||
-          "Unable to update API key."
-      );
-    } finally {
-      setActionId(null);
-    }
-  };
-
-  // =====================================================
-  // DELETE API KEY
-  // =====================================================
-
-  const deleteApiKey = async (key) => {
-    if (!key?.id) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Delete "${key.name}" permanently?\n\nThis action cannot be undone.`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setActionId(key.id);
-    setError("");
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/keys/${key.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "X-API-KEY": API_KEY,
-            Accept: "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            "Unable to delete API key"
-        );
-      }
-
-      setKeys((currentKeys) =>
-        currentKeys.filter(
-          (item) => item.id !== key.id
-        )
-      );
-    } catch (err) {
-      console.error(
-        "Unable to delete API key:",
-        err
-      );
-
-      setError(
-        err.message ||
-          "Unable to delete API key."
-      );
-    } finally {
-      setActionId(null);
-    }
-  };
-
-  // =====================================================
-  // SHOW / HIDE KEY
-  // =====================================================
-
-  const toggleVisibility = (id) => {
-    setVisibleKeys((current) => ({
+  const toggleReveal = (id) => {
+    setRevealedKeys((current) => ({
       ...current,
       [id]: !current[id],
     }));
   };
 
-  // =====================================================
-  // MASK KEY
-  // =====================================================
+  /* =====================================================
+     ACTIVE / INACTIVE
+  ===================================================== */
 
-  const maskKey = (keyValue) => {
-    if (!keyValue) {
-      return "—";
-    }
-
-    if (keyValue.length <= 12) {
-      return "••••••••••••";
-    }
-
-    return `${keyValue.substring(
-      0,
-      8
-    )}••••••••••••${keyValue.slice(-4)}`;
+  const toggleKeyStatus = (id) => {
+    setKeys((current) =>
+      current.map((key) =>
+        key.id === id
+          ? {
+              ...key,
+              status:
+                key.status === "ACTIVE"
+                  ? "INACTIVE"
+                  : "ACTIVE",
+            }
+          : key
+      )
+    );
   };
 
-  // =====================================================
-  // COPY KEY
-  // =====================================================
+  /* =====================================================
+     ROTATE KEY
+  ===================================================== */
 
-  const copyKey = async (value) => {
-    if (!value) {
-      return;
-    }
+  const handleRotate = (id) => {
+    setKeys((current) =>
+      current.map((key) =>
+        key.id === id
+          ? {
+              ...key,
+              key: generateApiKey(),
+              created: "Just now",
+              lastUsed: "Never",
+              requests: 0,
+              status: "ACTIVE",
+            }
+          : key
+      )
+    );
 
-    try {
-      await navigator.clipboard.writeText(value);
-
-      setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 1800);
-    } catch (err) {
-      console.error(
-        "Unable to copy API key:",
-        err
-      );
-    }
+    setRevealedKeys((current) => ({
+      ...current,
+      [id]: true,
+    }));
   };
-
-  // =====================================================
-  // FORMAT DATE
-  // =====================================================
-
-  const formatDate = (date) => {
-    if (!date) {
-      return "—";
-    }
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "—";
-    }
-
-    return parsedDate.toLocaleDateString([], {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  // =====================================================
-  // OPEN CREATE MODAL
-  // =====================================================
-
-  const openCreateModal = () => {
-    setError("");
-    setNewKeyName("");
-    setShowCreateModal(true);
-  };
-
-  // =====================================================
-  // CLOSE CREATED KEY MODAL
-  // =====================================================
-
-  const closeCreatedKeyModal = () => {
-    setShowKeyModal(false);
-    setCreatedKey(null);
-    setCopied(false);
-  };
-
-  // =====================================================
-  // RENDER
-  // =====================================================
 
   return (
     <section className="api-keys-page">
+
       {/* =================================================
-          PAGE HEADER
+          AMBIENT BACKGROUND
       ================================================= */}
 
-      <div className="api-keys-header">
-        <div>
-          <span className="api-keys-eyebrow">
-            ACCESS MANAGEMENT
-          </span>
+      <div className="keys-ambient keys-ambient-one" />
+      <div className="keys-ambient keys-ambient-two" />
+      <div className="keys-grid" />
 
-          <h2>API Keys</h2>
+      {/* =================================================
+          HERO
+      ================================================= */}
+
+      <header className="keys-hero">
+
+        <div className="keys-hero-content">
+
+          <div className="keys-eyebrow">
+            <span />
+            SECURITY CREDENTIALS
+          </div>
+
+          <h1>
+            API
+            <strong> Keys</strong>
+          </h1>
 
           <p>
-            Create, manage and control credentials
-            used to access your Smart API Guard
-            gateway.
+            Control the credentials that authorize
+            trusted applications to communicate with
+            Smart API Guard.
           </p>
-        </div>
 
-        <div className="api-keys-actions">
-          <button
-            type="button"
-            className="api-keys-refresh"
-            onClick={fetchKeys}
-            disabled={loading}
-          >
-            <span
-              className={
-                loading ? "spinning" : ""
-              }
-            >
-              ↻
-            </span>
+          <div className="keys-hero-status">
 
-            {loading
-              ? "Refreshing..."
-              : "Refresh"}
-          </button>
+            <div className="hero-status-light">
+              <span />
+            </div>
 
-          <button
-            type="button"
-            className="api-keys-create"
-            onClick={openCreateModal}
-          >
-            <span>＋</span>
-            Create API Key
-          </button>
-        </div>
-      </div>
+            <div>
+              <strong>
+                KEY MANAGEMENT ACTIVE
+              </strong>
 
-      {/* =================================================
-          ERROR
-      ================================================= */}
+              <small>
+                Credential layer operational
+              </small>
+            </div>
 
-      {error && (
-        <div className="api-keys-error">
-          <div className="api-keys-error-icon">
-            !
           </div>
 
-          <div>
-            <strong>
-              Something went wrong
-            </strong>
-
-            <span>{error}</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={fetchKeys}
-          >
-            Try again
-          </button>
-        </div>
-      )}
-
-      {/* =================================================
-          SUMMARY
-      ================================================= */}
-
-      <div className="api-keys-summary">
-        <div className="api-summary-card">
-          <div className="api-summary-icon">
-            ⌁
-          </div>
-
-          <div>
-            <span>Total Keys</span>
-            <strong>{keys.length}</strong>
-          </div>
-        </div>
-
-        <div className="api-summary-card active-summary">
-          <div className="api-summary-icon">
-            ✓
-          </div>
-
-          <div>
-            <span>Active</span>
-            <strong>{activeCount}</strong>
-          </div>
-        </div>
-
-        <div className="api-summary-card inactive-summary">
-          <div className="api-summary-icon">
-            ○
-          </div>
-
-          <div>
-            <span>Inactive</span>
-            <strong>{inactiveCount}</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* =================================================
-          API KEY REGISTRY
-      ================================================= */}
-
-      <div className="api-keys-card">
-        <div className="api-keys-card-header">
-          <div>
-            <span>YOUR CREDENTIALS</span>
-
-            <h3>API Key Registry</h3>
-          </div>
-
-          <div className="api-key-count">
-            {keys.length}{" "}
-            {keys.length === 1
-              ? "key"
-              : "keys"}
-          </div>
         </div>
 
         {/* =================================================
-            LOADING
+            SECURITY CORE
         ================================================= */}
 
-        {loading ? (
-          <div className="api-keys-loading">
-            <div className="api-loading-spinner"></div>
+        <div
+          className={`security-core ${
+            securityPulse
+              ? "security-core-pulse"
+              : ""
+          }`}
+        >
+
+          <div className="core-orbit core-orbit-one" />
+          <div className="core-orbit core-orbit-two" />
+          <div className="core-orbit core-orbit-three" />
+
+          <div className="core-glow" />
+
+          <div className="core-inner">
+            <span>𓃦</span>
+          </div>
+
+          <div className="core-scan" />
+
+          <div className="core-label">
+            <small>GUARD</small>
+            <strong>
+              IDENTITY CORE
+            </strong>
+          </div>
+
+        </div>
+
+      </header>
+
+      {/* =================================================
+          OVERVIEW
+      ================================================= */}
+
+      <div className="keys-overview">
+
+        {/* TOTAL */}
+
+        <div className="overview-card">
+
+          <span className="overview-icon">
+            ◈
+          </span>
+
+          <div>
+            <small>
+              TOTAL KEYS
+            </small>
 
             <strong>
-              Loading API keys...
+              {totalKeys
+                .toString()
+                .padStart(2, "0")}
             </strong>
-
-            <span>
-              Connecting to Smart API Guard
-            </span>
           </div>
-        ) : keys.length === 0 ? (
-          /* =================================================
-             EMPTY
-          ================================================= */
 
-          <div className="api-keys-empty">
-            <div className="api-empty-icon">
-              🔐
-            </div>
+          <i />
+
+        </div>
+
+        {/* ACTIVE */}
+
+        <div className="overview-card">
+
+          <span className="overview-icon">
+            ◉
+          </span>
+
+          <div>
+            <small>
+              ACTIVE KEYS
+            </small>
+
+            <strong className="secure-text">
+              {activeKeys
+                .toString()
+                .padStart(2, "0")}
+            </strong>
+          </div>
+
+          <i />
+
+        </div>
+
+        {/* INACTIVE */}
+
+        <div className="overview-card">
+
+          <span className="overview-icon">
+            ◌
+          </span>
+
+          <div>
+            <small>
+              INACTIVE KEYS
+            </small>
 
             <strong>
-              No API keys yet
+              {inactiveKeys
+                .toString()
+                .padStart(2, "0")}
             </strong>
-
-            <span>
-              Create your first API key to start
-              securing applications through the
-              gateway.
-            </span>
-
-            <button
-              type="button"
-              onClick={openCreateModal}
-            >
-              ＋ Create Your First Key
-            </button>
           </div>
-        ) : (
-          /* =================================================
-             KEY LIST
-          ================================================= */
 
-          <div className="api-key-list">
-            {keys.map((key) => {
-              const isVisible =
-                visibleKeys[key.id];
+          <i />
 
-              const isActionLoading =
-                actionId === key.id;
+        </div>
 
-              return (
-                <div
-                  className={`api-key-row ${
-                    key.active
-                      ? "key-active"
-                      : "key-inactive"
-                  }`}
-                  key={key.id}
-                >
-                  {/* ICON */}
-
-                  <div className="api-key-main-icon">
-                    🔑
-                  </div>
-
-                  {/* NAME */}
-
-                  <div className="api-key-name">
-                    <strong>
-                      {key.name ||
-                        "Unnamed key"}
-                    </strong>
-
-                    <span>
-                      Created{" "}
-                      {formatDate(
-                        key.createdAt
-                      )}
-                    </span>
-                  </div>
-
-                  {/* KEY */}
-
-                  <div className="api-key-value">
-                    <span className="api-column-label">
-                      API KEY
-                    </span>
-
-                    <code>
-                      {isVisible
-                        ? key.keyValue
-                        : maskKey(
-                            key.keyValue
-                          )}
-                    </code>
-
-                    <div className="api-key-controls">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toggleVisibility(
-                            key.id
-                          )
-                        }
-                        title={
-                          isVisible
-                            ? "Hide API key"
-                            : "Show API key"
-                        }
-                        aria-label={
-                          isVisible
-                            ? "Hide API key"
-                            : "Show API key"
-                        }
-                      >
-                        {isVisible
-                          ? "◉"
-                          : "◌"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          copyKey(
-                            key.keyValue
-                          )
-                        }
-                        title="Copy API key"
-                        aria-label="Copy API key"
-                      >
-                        ⧉
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* TIER */}
-
-                  <div className="api-key-tier">
-                    <span className="api-column-label">
-                      TIER
-                    </span>
-
-                    <span className="tier-badge">
-                      {key.tier || "FREE"}
-                    </span>
-                  </div>
-
-                  {/* RATE LIMIT */}
-
-                  <div className="api-key-limit">
-                    <span className="api-column-label">
-                      RATE LIMIT
-                    </span>
-
-                    <strong>
-                      {key.rateLimit ?? 0}
-                    </strong>
-
-                    <small>
-                      req / min
-                    </small>
-                  </div>
-
-                  {/* STATUS */}
-
-                  <div className="api-key-status">
-                    <span className="api-column-label">
-                      STATUS
-                    </span>
-
-                    <button
-                      type="button"
-                      className={
-                        key.active
-                          ? "status-toggle active"
-                          : "status-toggle inactive"
-                      }
-                      onClick={() =>
-                        toggleKeyStatus(
-                          key
-                        )
-                      }
-                      disabled={
-                        isActionLoading
-                      }
-                    >
-                      <span></span>
-
-                      {key.active
-                        ? "Active"
-                        : "Inactive"}
-                    </button>
-                  </div>
-
-                  {/* DELETE */}
-
-                  <button
-                    type="button"
-                    className="api-key-delete"
-                    onClick={() =>
-                      deleteApiKey(key)
-                    }
-                    disabled={
-                      isActionLoading
-                    }
-                    title="Delete API key"
-                    aria-label="Delete API key"
-                  >
-                    {isActionLoading
-                      ? "…"
-                      : "⌫"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* =================================================
-          SECURITY NOTE
+          KEY SECTION HEADER
       ================================================= */}
 
-      <div className="api-security-note">
-        <div className="api-security-icon">
-          ✦
-        </div>
+      <div className="keys-section-header">
 
         <div>
-          <strong>
-            Keep your API keys secure
-          </strong>
 
           <span>
-            Treat API keys like passwords. Never
-            expose them in public repositories,
-            frontend source code or client-side
-            logs.
+            CREDENTIAL VAULT
           </span>
+
+          <h2>
+            Your API Keys
+          </h2>
+
         </div>
+
+        <button
+          type="button"
+          className="create-key-button"
+          onClick={() =>
+            setShowCreate(true)
+          }
+        >
+          <span>+</span>
+          CREATE NEW API KEY
+        </button>
+
       </div>
+
+      {/* =================================================
+          KEY LIST
+      ================================================= */}
+
+      <div className="keys-list">
+
+        {keys.map((key, index) => {
+
+          const isRevealed =
+            revealedKeys[key.id];
+
+          const isInactive =
+            key.status === "INACTIVE";
+
+          return (
+            <article
+              className={`credential-card ${
+                isInactive
+                  ? "credential-inactive"
+                  : ""
+              }`}
+              key={key.id}
+              style={{
+                "--key-index": index,
+              }}
+            >
+
+              {/* CARD LIGHT */}
+
+              <div className="credential-light" />
+
+              {/* =================================================
+                  TOP
+              ================================================= */}
+
+              <div className="credential-top">
+
+                <div className="credential-identity">
+
+                  <div className="credential-icon">
+                    <span>
+                      ◈
+                    </span>
+                  </div>
+
+                  <div>
+
+                    <div className="credential-name-row">
+
+                      <h3>
+                        {key.name}
+                      </h3>
+
+                      {/* TIER */}
+
+                      <span
+                        className={`tier-badge tier-${key.tier.toLowerCase()}`}
+                      >
+                        {key.tier}
+                      </span>
+
+                      {/* ENVIRONMENT */}
+
+                      <span
+                        className={`environment-badge ${
+                          key.environment.toLowerCase()
+                        }`}
+                      >
+                        {key.environment}
+                      </span>
+
+                    </div>
+
+                    <span className="credential-subtitle">
+                      Gateway access credential
+                    </span>
+
+                  </div>
+
+                </div>
+
+                {/* STATUS */}
+
+                <span
+                  className={`credential-status ${
+                    key.status.toLowerCase()
+                  }`}
+                >
+                  <i />
+                  {key.status}
+                </span>
+
+              </div>
+
+              {/* =================================================
+                  KEY DISPLAY
+              ================================================= */}
+
+              <div className="credential-key">
+
+                <div className="credential-key-label">
+
+                  <span>
+                    API KEY
+                  </span>
+
+                  <small>
+                    {isInactive
+                      ? "ACCESS DISABLED"
+                      : "PROTECTED CREDENTIAL"}
+                  </small>
+
+                </div>
+
+                <code>
+                  {isInactive
+                    ? "••••••••••••••••••••"
+                    : isRevealed
+                    ? key.key
+                    : maskKey(key.key)}
+                </code>
+
+                {!isInactive && (
+                  <button
+                    type="button"
+                    className="key-reveal-button"
+                    onClick={() =>
+                      toggleReveal(key.id)
+                    }
+                  >
+                    {isRevealed
+                      ? "HIDE"
+                      : "REVEAL"}
+                  </button>
+                )}
+
+              </div>
+
+              {/* =================================================
+                  METADATA
+              ================================================= */}
+
+              <div className="credential-meta">
+
+                <div>
+                  <span>
+                    TIER
+                  </span>
+
+                  <strong>
+                    {key.tier}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    CREATED
+                  </span>
+
+                  <strong>
+                    {key.created}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    LAST USED
+                  </span>
+
+                  <strong>
+                    {key.lastUsed}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    REQUESTS
+                  </span>
+
+                  <strong>
+                    {key.requests.toLocaleString()}
+                  </strong>
+                </div>
+
+              </div>
+
+              {/* =================================================
+                  ACTIONS
+              ================================================= */}
+
+              <div className="credential-actions">
+
+                {!isInactive && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopy(key)
+                      }
+                    >
+                      {copiedId === key.id
+                        ? "✓ COPIED"
+                        : "COPY KEY"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleRotate(key.id)
+                      }
+                    >
+                      ↻ ROTATE
+                    </button>
+                  </>
+                )}
+
+                {/* ACTIVE / INACTIVE */}
+
+                <button
+                  type="button"
+                  className={
+                    isInactive
+                      ? "activate-action"
+                      : "danger-action"
+                  }
+                  onClick={() =>
+                    toggleKeyStatus(key.id)
+                  }
+                >
+                  {isInactive
+                    ? "SET ACTIVE"
+                    : "SET INACTIVE"}
+                </button>
+
+              </div>
+
+              {/* =================================================
+                  BOTTOM LINE
+              ================================================= */}
+
+              <div className="credential-line">
+                <span />
+              </div>
+
+            </article>
+          );
+        })}
+
+      </div>
+
+      {/* =================================================
+          SECURITY INFORMATION
+      ================================================= */}
+
+      <section className="key-security-section">
+
+        <div className="security-heading">
+
+          <span>
+            GUARD PROTOCOL
+          </span>
+
+          <h2>
+            Every credential is a
+            <strong>
+              {" "}trust boundary.
+            </strong>
+          </h2>
+
+        </div>
+
+        <div className="security-info-grid">
+
+          <article>
+
+            <span>
+              01
+            </span>
+
+            <div>
+              <h3>
+                Authentication
+              </h3>
+
+              <p>
+                Requests can be validated against
+                an active credential before reaching
+                protected APIs.
+              </p>
+            </div>
+
+          </article>
+
+          <article>
+
+            <span>
+              02
+            </span>
+
+            <div>
+              <h3>
+                Controlled Access
+              </h3>
+
+              <p>
+                Each credential provides an explicit
+                identity layer for trusted applications
+                and services.
+              </p>
+            </div>
+
+          </article>
+
+          <article>
+
+            <span>
+              03
+            </span>
+
+            <div>
+              <h3>
+                Protected Secrets
+              </h3>
+
+              <p>
+                Credentials can be rotated or
+                temporarily disabled whenever
+                access needs to change.
+              </p>
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
 
       {/* =================================================
           CREATE MODAL
       ================================================= */}
 
-      {showCreateModal && (
+      {showCreate && (
         <div
-          className="api-modal-overlay"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              setShowCreateModal(false);
-            }
-          }}
+          className="key-modal-backdrop"
+          onClick={() =>
+            setShowCreate(false)
+          }
         >
-          <div className="api-modal">
-            <button
-              type="button"
-              className="api-modal-close"
-              onClick={() =>
-                setShowCreateModal(false)
-              }
-              aria-label="Close"
-            >
-              ×
-            </button>
 
-            <div className="api-modal-icon">
-              🔑
+          <div
+            className="key-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="modal-core">
+              <span>
+                𓃦
+              </span>
             </div>
 
-            <span className="api-modal-eyebrow">
-              NEW CREDENTIAL
-            </span>
+            <div className="modal-heading">
 
-            <h3>Create API Key</h3>
+              <span>
+                NEW CREDENTIAL
+              </span>
 
-            <p>
-              Give your API key a recognizable
-              name so you can identify it later.
-            </p>
+              <h2>
+                Create API Key
+              </h2>
 
-            <form onSubmit={createApiKey}>
-              <label htmlFor="api-key-name">
-                Key name
-              </label>
+              <p>
+                Generate a new credential for a
+                trusted application or gateway.
+              </p>
+
+            </div>
+
+            {/* KEY NAME */}
+
+            <label>
+
+              <span>
+                KEY NAME
+              </span>
 
               <input
-                id="api-key-name"
                 type="text"
                 value={newKeyName}
                 onChange={(event) =>
@@ -821,116 +878,126 @@ function ApiKeys() {
                     event.target.value
                   )
                 }
-                placeholder="e.g. Production App"
-                maxLength={100}
+                placeholder="Production Gateway"
                 autoFocus
               />
 
-              <div className="api-modal-actions">
-                <button
-                  type="button"
-                  className="api-modal-cancel"
-                  onClick={() =>
-                    setShowCreateModal(false)
-                  }
-                >
-                  Cancel
-                </button>
+            </label>
 
-                <button
-                  type="submit"
-                  className="api-modal-create"
-                  disabled={
-                    creating ||
-                    !newKeyName.trim()
-                  }
-                >
-                  {creating
-                    ? "Generating..."
-                    : "Generate Key"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            {/* TIER */}
 
-      {/* =================================================
-          CREATED KEY MODAL
-      ================================================= */}
+            <label>
 
-      {showKeyModal && createdKey && (
-        <div
-          className="api-modal-overlay"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              closeCreatedKeyModal();
-            }
-          }}
-        >
-          <div className="api-modal created-key-modal">
-            <div className="created-success-icon">
-              ✓
-            </div>
+              <span>
+                KEY TIER
+              </span>
 
-            <span className="api-modal-eyebrow">
-              KEY GENERATED
-            </span>
-
-            <h3>API Key Created</h3>
-
-            <p>
-              Your new credential for{" "}
-              <strong>
-                {createdKey.name}
-              </strong>{" "}
-              is ready.
-            </p>
-
-            <div className="created-key-box">
-              <code>
-                {createdKey.keyValue}
-              </code>
-
-              <button
-                type="button"
-                onClick={() =>
-                  copyKey(
-                    createdKey.keyValue
+              <select
+                value={newTier}
+                onChange={(event) =>
+                  setNewTier(
+                    event.target.value
                   )
                 }
               >
-                {copied
-                  ? "✓ Copied"
-                  : "⧉ Copy"}
-              </button>
-            </div>
 
-            <div className="created-warning">
-              <span>!</span>
+                <option value="FREE">
+                  FREE
+                </option>
+
+                <option value="PRO">
+                  PRO
+                </option>
+
+                <option value="ADMIN">
+                  ADMIN
+                </option>
+
+              </select>
+
+            </label>
+
+            {/* ENVIRONMENT */}
+
+            <label>
+
+              <span>
+                ENVIRONMENT
+              </span>
+
+              <select
+                value={newEnvironment}
+                onChange={(event) =>
+                  setNewEnvironment(
+                    event.target.value
+                  )
+                }
+              >
+
+                <option value="PRODUCTION">
+                  PRODUCTION
+                </option>
+
+                <option value="DEVELOPMENT">
+                  DEVELOPMENT
+                </option>
+
+                <option value="LOCAL">
+                  LOCAL
+                </option>
+
+              </select>
+
+            </label>
+
+            {/* WARNING */}
+
+            <div className="modal-warning">
+
+              <span>
+                !
+              </span>
 
               <p>
-                Copy this key now and store it
-                somewhere secure. Never share it
-                publicly.
+                Store the generated credential
+                securely. Never expose API keys
+                in public client-side code.
               </p>
+
             </div>
 
-            <button
-              type="button"
-              className="api-modal-done"
-              onClick={
-                closeCreatedKeyModal
-              }
-            >
-              Done
-            </button>
+            {/* ACTIONS */}
+
+            <div className="modal-actions">
+
+              <button
+                type="button"
+                className="modal-cancel"
+                onClick={() =>
+                  setShowCreate(false)
+                }
+              >
+                CANCEL
+              </button>
+
+              <button
+                type="button"
+                className="modal-create"
+                onClick={handleCreateKey}
+              >
+                GENERATE KEY
+                <span>
+                  →
+                </span>
+              </button>
+
+            </div>
+
           </div>
+
         </div>
       )}
+
     </section>
   );
 }

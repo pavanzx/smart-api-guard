@@ -11,8 +11,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class RateLimiterService {
 
-    private static final long REFILL_INTERVAL_MS = 1000;
+    // =====================================================
+    // RATE LIMIT WINDOW
+    // =====================================================
 
+    /*
+     * One rate-limit window = 60 seconds.
+     *
+     * FREE example:
+     *
+     *     rateLimit = 10
+     *     10 requests per minute
+     *
+     * PRO example:
+     *
+     *     rateLimit = 100
+     *     100 requests per minute
+     */
+    private static final long WINDOW_SIZE_MS =
+            60_000L;
+
+    /*
+     * One bucket for each API key.
+     */
     private final Map<String, ClientBucket> buckets =
             new ConcurrentHashMap<>();
 
@@ -24,15 +45,26 @@ public class RateLimiterService {
         this.apiKeyRepository = apiKeyRepository;
     }
 
-    public RateLimitResult checkRequest(String clientId) {
+    // =====================================================
+    // CHECK REQUEST
+    // =====================================================
 
-        // Find active API key
+    public RateLimitResult checkRequest(
+            String clientId) {
+
+        // -------------------------------------------------
+        // Find ACTIVE API key
+        // -------------------------------------------------
+
         ApiKey apiKey =
                 apiKeyRepository
-                .findByKeyValueAndActiveTrue(clientId)                     
-                 .orElse(null);
+                        .findByKeyValueAndActiveTrue(clientId)
+                        .orElse(null);
 
-        // Unknown or inactive API key
+        // -------------------------------------------------
+        // UNKNOWN / INACTIVE API KEY
+        // -------------------------------------------------
+
         if (apiKey == null) {
 
             return new RateLimitResult(
@@ -43,88 +75,180 @@ public class RateLimiterService {
             );
         }
 
+        // -------------------------------------------------
+        // CURRENT DATABASE CONFIGURATION
+        // -------------------------------------------------
+
         int limit =
-                apiKey.getRateLimit();
+                Math.max(
+                        apiKey.getRateLimit(),
+                        1
+                );
 
         String tier =
                 apiKey.getTier();
 
+        // -------------------------------------------------
+        // CREATE OR UPDATE BUCKET
+        // -------------------------------------------------
+
         ClientBucket bucket =
-                buckets.computeIfAbsent(
+                buckets.compute(
                         clientId,
-                        key -> new ClientBucket(limit)
+                        (key, existingBucket) -> {
+
+                            // No bucket yet.
+                            if (existingBucket == null) {
+
+                                return new ClientBucket(
+                                        limit
+                                );
+                            }
+
+                            /*
+                             * If rate_limit was changed in MySQL,
+                             * immediately create a new bucket.
+                             */
+                            if (existingBucket.getLimit()
+                                    != limit) {
+
+                                return new ClientBucket(
+                                        limit
+                                );
+                            }
+
+                            return existingBucket;
+                        }
                 );
+
+        // -------------------------------------------------
+        // CHECK / CONSUME REQUEST
+        // -------------------------------------------------
 
         return bucket.tryConsume(tier);
     }
 
+    // =====================================================
+    // CLIENT BUCKET
+    // =====================================================
+
     private static class ClientBucket {
 
-        private int tokens;
+        /*
+         * Maximum number of requests allowed
+         * during the current window.
+         */
+        private final int limit;
 
-        private long lastRefillTime;
+        /*
+         * Number of requests already used.
+         */
+        private int requestCount;
 
-        private final int maxTokens;
+        /*
+         * Start time of the current window.
+         */
+        private long windowStart;
 
-        public ClientBucket(int maxTokens) {
+        // -------------------------------------------------
+        // CONSTRUCTOR
+        // -------------------------------------------------
 
-            this.maxTokens = maxTokens;
-            this.tokens = maxTokens;
+        public ClientBucket(int limit) {
 
-            this.lastRefillTime =
+            this.limit = Math.max(
+                    limit,
+                    1
+            );
+
+            this.requestCount = 0;
+
+            this.windowStart =
                     System.currentTimeMillis();
         }
+
+        // -------------------------------------------------
+        // GET LIMIT
+        // -------------------------------------------------
+
+        public int getLimit() {
+
+            return limit;
+        }
+
+        // -------------------------------------------------
+        // TRY CONSUME
+        // -------------------------------------------------
 
         public synchronized RateLimitResult tryConsume(
                 String tier) {
 
-            refillTokens();
+            long currentTime =
+                    System.currentTimeMillis();
 
-            if (tokens > 0) {
+            // -------------------------------------------------
+            // CHECK WHETHER CURRENT WINDOW EXPIRED
+            // -------------------------------------------------
 
-                tokens--;
+            if (currentTime - windowStart
+                    >= WINDOW_SIZE_MS) {
+
+                /*
+                 * Start a completely new window.
+                 */
+                windowStart = currentTime;
+
+                requestCount = 0;
+            }
+
+            // -------------------------------------------------
+            // CALCULATE REMAINING REQUESTS
+            // -------------------------------------------------
+
+            int remaining =
+                    Math.max(
+                            limit - requestCount,
+                            0
+                    );
+
+            // -------------------------------------------------
+            // RATE LIMIT EXCEEDED
+            // -------------------------------------------------
+
+            if (requestCount >= limit) {
 
                 return new RateLimitResult(
-                        true,
-                        maxTokens,
-                        tokens,
+                        false,
+                        limit,
+                        0,
                         tier
                 );
             }
 
+            // -------------------------------------------------
+            // ALLOW REQUEST
+            // -------------------------------------------------
+
+            requestCount++;
+
+            remaining =
+                    Math.max(
+                            limit - requestCount,
+                            0
+                    );
+
             return new RateLimitResult(
-                    false,
-                    maxTokens,
-                    0,
+                    true,
+                    limit,
+                    remaining,
                     tier
             );
         }
-
-        private void refillTokens() {
-
-            long currentTime =
-                    System.currentTimeMillis();
-
-            long elapsedTime =
-                    currentTime - lastRefillTime;
-
-            if (elapsedTime >= REFILL_INTERVAL_MS) {
-
-                long tokensToAdd =
-                        elapsedTime /
-                        REFILL_INTERVAL_MS;
-
-                tokens = (int) Math.min(
-                        maxTokens,
-                        tokens + tokensToAdd
-                );
-
-                lastRefillTime +=
-                        tokensToAdd *
-                        REFILL_INTERVAL_MS;
-            }
-        }
     }
+
+    // =====================================================
+    // RATE LIMIT RESULT
+    // =====================================================
 
     public record RateLimitResult(
             boolean allowed,
