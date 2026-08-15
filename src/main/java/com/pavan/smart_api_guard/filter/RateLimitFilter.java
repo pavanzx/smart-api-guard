@@ -220,7 +220,20 @@ if (endpoint.equals("/")
 
             return;
         }
+// =====================================================
+// FRONTEND STATIC FILES
+// =====================================================
 
+String uri = request.getRequestURI();
+
+if ("/".equals(uri)
+        || "/index.html".equals(uri)
+        || uri.startsWith("/assets/")
+        || uri.startsWith("/favicon")) {
+
+    filterChain.doFilter(request, response);
+    return;
+}
         // =====================================================
         // READ API KEY
         // =====================================================
