@@ -18,18 +18,20 @@ public class CorsConfig {
                 new CorsConfiguration();
 
         // =====================================================
-        // FRONTEND ORIGINS
+        // FRONTEND
         // =====================================================
 
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:5178",
-                        "http://localhost:5173"
+                        "http://localhost:5173",
+                        "https://smart-api-guard.onrender.com"
+
                 )
         );
 
         // =====================================================
-        // HTTP METHODS
+        // METHODS
         // =====================================================
 
         configuration.setAllowedMethods(
@@ -43,7 +45,7 @@ public class CorsConfig {
         );
 
         // =====================================================
-        // REQUEST HEADERS
+        // HEADERS
         // =====================================================
 
         configuration.setAllowedHeaders(
@@ -55,7 +57,7 @@ public class CorsConfig {
         );
 
         // =====================================================
-        // RESPONSE HEADERS
+        // EXPOSED RESPONSE HEADERS
         // =====================================================
 
         configuration.setExposedHeaders(
@@ -73,13 +75,13 @@ public class CorsConfig {
         configuration.setAllowCredentials(false);
 
         // =====================================================
-        // CACHE PREFLIGHT
+        // PREFLIGHT CACHE
         // =====================================================
 
         configuration.setMaxAge(3600L);
 
         // =====================================================
-        // APPLY TO ALL API ROUTES
+        // ALL ROUTES
         // =====================================================
 
         UrlBasedCorsConfigurationSource source =

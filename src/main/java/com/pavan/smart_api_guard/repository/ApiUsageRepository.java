@@ -1,6 +1,7 @@
 package com.pavan.smart_api_guard.repository;
 
 import com.pavan.smart_api_guard.entity.ApiUsage;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -18,13 +18,15 @@ public class UsageController {
 
     private final ApiUsageRepository apiUsageRepository;
 
-    public UsageController(ApiUsageRepository apiUsageRepository) {
+    public UsageController(
+            ApiUsageRepository apiUsageRepository) {
+
         this.apiUsageRepository = apiUsageRepository;
     }
 
-    // =========================================
+    // =====================================================
     // STATS
-    // =========================================
+    // =====================================================
 
     @GetMapping("/stats")
     public Map<String, Long> getStats() {
@@ -88,9 +90,9 @@ public class UsageController {
         return stats;
     }
 
-    // =========================================
+    // =====================================================
     // RECENT USAGE
-    // =========================================
+    // =====================================================
 
     @GetMapping("/recent")
     public List<Map<String, Object>> getRecentUsage() {
@@ -100,51 +102,13 @@ public class UsageController {
                         .findTop20ByOrderByCreatedAtDesc();
 
         return usages.stream()
-                .map(usage -> {
-
-                    Map<String, Object> data =
-                            new HashMap<>();
-
-                    data.put(
-                            "id",
-                            usage.getId()
-                    );
-
-                    // Added because the React dashboard
-                    // displays the API key.
-                    data.put(
-                            "apiKey",
-                            usage.getApiKey()
-                    );
-
-                    data.put(
-                            "endpoint",
-                            usage.getEndpoint()
-                    );
-
-                    data.put(
-                            "httpStatus",
-                            usage.getHttpStatus()
-                    );
-
-                    data.put(
-                            "allowed",
-                            usage.isAllowed()
-                    );
-
-                    data.put(
-                            "createdAt",
-                            usage.getCreatedAt()
-                    );
-
-                    return data;
-                })
+                .map(this::toUsageResponse)
                 .collect(Collectors.toList());
     }
 
-    // =========================================
+    // =====================================================
     // ANALYTICS
-    // =========================================
+    // =====================================================
 
     @GetMapping("/analytics")
     public Map<String, Object> getAnalytics() {
@@ -160,11 +124,19 @@ public class UsageController {
 
         for (ApiUsage usage : usages) {
 
+            // -------------------------------------------------
+            // Endpoint statistics
+            // -------------------------------------------------
+
             endpointCounts.merge(
                     usage.getEndpoint(),
                     1L,
                     Long::sum
             );
+
+            // -------------------------------------------------
+            // HTTP status statistics
+            // -------------------------------------------------
 
             String status =
                     String.valueOf(
@@ -192,5 +164,54 @@ public class UsageController {
         );
 
         return analytics;
+    }
+
+    // =====================================================
+    // USAGE RESPONSE MAPPER
+    // =====================================================
+
+    private Map<String, Object> toUsageResponse(
+            ApiUsage usage) {
+
+        Map<String, Object> data =
+                new HashMap<>();
+
+        data.put(
+                "id",
+                usage.getId()
+        );
+
+        /*
+         * The ApiUsage entity has @JsonIgnore on apiKey,
+         * but we explicitly add it here because the React
+         * dashboard needs to display which API key generated
+         * the request.
+         */
+        data.put(
+                "apiKey",
+                usage.getApiKey()
+        );
+
+        data.put(
+                "endpoint",
+                usage.getEndpoint()
+        );
+
+        data.put(
+                "httpStatus",
+                usage.getHttpStatus()
+        );
+
+        data.put(
+                "allowed",
+                usage.isAllowed()
+        );
+
+        data.put(
+                "createdAt",
+                usage.getCreatedAt()
+        );
+
+        return data;
     }
 }

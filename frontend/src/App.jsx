@@ -24,7 +24,7 @@ import "./App.css";
    CONFIG
 ===================================================== */
 
-const API_BASE_URL = "https://smart-api-guard.onrender.com";const API_KEY = "PAVAN-PRO-KEY";
+const API_BASE_URL = "";
 
 const INITIAL_STATS = {
   totalRequests: 0,
