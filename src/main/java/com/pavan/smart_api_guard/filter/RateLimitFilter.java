@@ -112,6 +112,18 @@ if (path.equals("/")
         String method =
                 request.getMethod();
 
+                // =====================================================
+// ALLOW FRONTEND FILES WITHOUT API KEY
+// =====================================================
+
+if (endpoint.equals("/")
+        || endpoint.startsWith("/assets/")
+        || endpoint.equals("/favicon.ico")) {
+
+    filterChain.doFilter(request, response);
+    return;
+}
+
         // =====================================================
         // CREATE API KEY
         // =====================================================
