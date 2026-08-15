@@ -147,9 +147,9 @@ function Sidebar({
                 : "API Offline"}
             </strong>
 
-            <small>
-              localhost:8080
-            </small>
+           <small>
+                smart-api-guard.onrender.com
+           </small>
 
           </div>
 
