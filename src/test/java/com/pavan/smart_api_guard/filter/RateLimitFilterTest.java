@@ -221,9 +221,11 @@ class RateLimitFilterTest {
                         "X-API-Tier",
                         "FREE"
                 );
-
-        verify(filterChain)
-                .doFilter(request, response);
+verify(filterChain)
+        .doFilter(
+                eq(request),
+                any(HttpServletResponse.class)
+        );
 
         verify(apiUsageService)
                 .logRequest(
@@ -364,7 +366,10 @@ class RateLimitFilterTest {
                 );
 
         verify(filterChain)
-                .doFilter(request, response);
+        .doFilter(
+                eq(request),
+                any(HttpServletResponse.class)
+        );
 
         verify(apiUsageService)
                 .logRequest(

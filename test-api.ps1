@@ -3,9 +3,9 @@
 # Compatible with Windows PowerShell
 # ============================================================
 
-$BaseUrl = "http://localhost:8080"
+$BaseUrl = "https://smart-api-guard-1.onrender.com"
 
-$ValidKey = "PAVAN-PRO-KEY"
+$ValidKey = "PSAG-PAVAN-8F42-XK91"
 $InvalidKey = "WRONG-KEY"
 $InactiveKey = "SAG-D2ayyL5TTQScHZ7dRJ5WuYiFV24Vr12X"
 

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ApiKeyService {
@@ -102,7 +103,36 @@ public class ApiKeyService {
 
         apiKeyRepository.save(apiKey);
     }
+    // =====================================================
+// VALIDATE API KEY
+// =====================================================
 
+public Map<String, Object> validateKey(String key) {
+
+    if (key == null || key.isBlank()) {
+        throw new IllegalArgumentException("API key is missing");
+    }
+
+    ApiKey apiKey = apiKeyRepository
+            .findByKeyValue(key)
+            .orElse(null);
+
+    if (apiKey == null) {
+        throw new IllegalArgumentException("Invalid API key");
+    }
+
+    if (!apiKey.isActive()) {
+        throw new IllegalArgumentException("API key is inactive");
+    }
+
+    return Map.of(
+            "valid", true,
+            "message", "API key is valid",
+            "name", apiKey.getName(),
+            "tier", apiKey.getTier(),
+            "rateLimit", apiKey.getRateLimit()
+    );
+}
     // =====================================================
     // GENERATE UNIQUE API KEY
     // =====================================================

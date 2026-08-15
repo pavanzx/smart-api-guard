@@ -24,8 +24,8 @@ import "./App.css";
    CONFIG
 ===================================================== */
 
-const API_BASE_URL = "";
-
+const API_BASE_URL =
+  "https://smart-api-guard-1.onrender.com";
 const INITIAL_STATS = {
   totalRequests: 0,
   successfulRequests: 0,
