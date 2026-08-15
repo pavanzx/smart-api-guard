@@ -1,4 +1,4 @@
-import {
+﻿import {
   useCallback,
   useEffect,
   useRef,
@@ -24,8 +24,9 @@ import "./App.css";
    CONFIG
 ===================================================== */
 
-const API_BASE_URL =
-  "https://smart-api-guard-1.onrender.com";
+const API_BASE_URL = "https://smart-api-guard-1.onrender.com";
+
+const getApiKey = () => localStorage.getItem("smart-api-key");
 const INITIAL_STATS = {
   totalRequests: 0,
   successfulRequests: 0,
@@ -199,7 +200,7 @@ const updateTargetProgress = useCallback(() => {
   }, [updateTargetProgress]);
 
   /* ===================================================
-     SVG PATH → EXACT 𓃦 POSITION
+     SVG PATH â†’ EXACT ð“ƒ¦ POSITION
   =================================================== */
 
   useEffect(() => {
@@ -410,7 +411,7 @@ const updateTargetProgress = useCallback(() => {
         />
 
         {/* =================================================
-            𓃦 SCROLL PATH GUARD
+            ð“ƒ¦ SCROLL PATH GUARD
         ================================================= */}
 
         <div
@@ -425,11 +426,11 @@ const updateTargetProgress = useCallback(() => {
           {/* =================================================
               SVG REMOVED
 
-              CUSTOM 𓃦 CHARACTER
+              CUSTOM ð“ƒ¦ CHARACTER
           ================================================= */}
 
           <span className="scroll-wolf-glyph">
-            𓃦
+            ð“ƒ¦
           </span>
 
           <div className="scroll-wolf-core" />
@@ -486,7 +487,7 @@ const updateTargetProgress = useCallback(() => {
             Dashboard
           </span>
 
-          <b>→</b>
+          <b>â†’</b>
         </button>
 
         <button
@@ -507,7 +508,7 @@ const updateTargetProgress = useCallback(() => {
             API Keys
           </span>
 
-          <b>→</b>
+          <b>â†’</b>
         </button>
 
         <button
@@ -528,7 +529,7 @@ const updateTargetProgress = useCallback(() => {
             Request Monitor
           </span>
 
-          <b>→</b>
+          <b>â†’</b>
         </button>
 
         <button
@@ -549,7 +550,7 @@ const updateTargetProgress = useCallback(() => {
             Analytics
           </span>
 
-          <b>→</b>
+          <b>â†’</b>
         </button>
       </div>
     </section>
@@ -620,7 +621,7 @@ function App() {
     });
 
   /* ===================================================
-     LOGIN → DASHBOARD
+     LOGIN â†’ DASHBOARD
   =================================================== */
 
   const handleAuthenticated =
@@ -678,7 +679,7 @@ function App() {
             {
               method: "GET",
               headers: {
-                "X-API-KEY": API_KEY,
+                "X-API-KEY": getApiKey() || "",
                 Accept:
                   "application/json",
               },
@@ -715,7 +716,7 @@ function App() {
             {
               method: "GET",
               headers: {
-                "X-API-KEY": API_KEY,
+                "X-API-KEY": getApiKey() || "",
                 Accept:
                   "application/json",
               },
@@ -770,7 +771,7 @@ function App() {
             {
               method: "GET",
               headers: {
-                "X-API-KEY": API_KEY,
+                "X-API-KEY": getApiKey() || "",
                 Accept:
                   "application/json",
               },
@@ -1020,7 +1021,7 @@ function App() {
               }
               disabled={loading}
             >
-              <span>↻</span>
+              <span>â†»</span>
 
               {loading
                 ? "Refreshing..."
@@ -1072,7 +1073,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "blue-card",
-            icon: "↗",
+            icon: "â†—",
             trend: "LIVE",
             label:
               "Total Requests",
@@ -1083,7 +1084,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "green-card",
-            icon: "✓",
+            icon: "âœ“",
             trend:
               "HEALTHY",
             label:
@@ -1107,7 +1108,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "red-card",
-            icon: "🔒",
+            icon: "ðŸ”’",
             trend:
               "SECURITY",
             label:
@@ -1119,7 +1120,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "purple-card",
-            icon: "⚡",
+            icon: "âš¡",
             trend:
               "LIMIT",
             label:
@@ -1177,7 +1178,7 @@ function App() {
                 </span>
               </div>
 
-              <b>→</b>
+              <b>â†’</b>
             </button>
 
             <button
@@ -1204,7 +1205,7 @@ function App() {
                 </span>
               </div>
 
-              <b>→</b>
+              <b>â†’</b>
             </button>
 
             <button
@@ -1231,7 +1232,7 @@ function App() {
                 </span>
               </div>
 
-              <b>→</b>
+              <b>â†’</b>
             </button>
 
           </div>
@@ -1465,8 +1466,8 @@ function App() {
                   }
                 >
                   {darkMode
-                    ? "☀"
-                    : "☾"}
+                    ? "â˜€"
+                    : "â˜¾"}
                 </span>
               </button>
 
@@ -1487,7 +1488,7 @@ function App() {
                 title="Logout"
                 aria-label="Logout"
               >
-                ⎋
+                âŽ‹
               </button>
             </div>
           </header>
@@ -1511,7 +1512,7 @@ function App() {
               <span>
                 <span className="footer-status" />
 
-                Smart API Guard ·
+                Smart API Guard Â·
                 Monitoring active
               </span>
 
@@ -1529,7 +1530,7 @@ function App() {
       </div>
 
       {/* =================================================
-          0.9 SECOND 𓃦 ARRIVAL
+          0.9 SECOND ð“ƒ¦ ARRIVAL
       ================================================= */}
 
       {showDashboardArrival && (
@@ -1546,14 +1547,14 @@ function App() {
 
           <div className="arrival-reveal-line" />
 
-          {/* 𓃦 */}
+          {/* ð“ƒ¦ */}
 
           <div className="arrival-wolf">
 
             <div className="arrival-wolf-aura" />
 
             <span>
-              𓃦
+              ð“ƒ¦
             </span>
 
           </div>
@@ -2097,7 +2098,7 @@ function App() {
         }
 
         /* =================================================
-           𓃦 SCROLL PATH WOLF
+           ð“ƒ¦ SCROLL PATH WOLF
         ================================================= */
 
         .scroll-path-wolf {
@@ -2125,7 +2126,7 @@ function App() {
         }
 
         /* =================================================
-           𓃦 CHARACTER
+           ð“ƒ¦ CHARACTER
 
            SVG WOLF COMPLETELY REMOVED.
         ================================================= */
@@ -2353,7 +2354,7 @@ function App() {
         }
 
         /* =================================================
-           𓃦 FLOAT ANIMATION
+           ð“ƒ¦ FLOAT ANIMATION
         ================================================= */
 
         @keyframes scrollWolfFloat {
