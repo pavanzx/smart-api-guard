@@ -8,10 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(
+            ResourceHandlerRegistry registry) {
+
         registry
                 .addResourceHandler("/**")
-                .addResourceLocations("file:/app/frontend-dist/")
-                .resourceChain(false);
+                .addResourceLocations(
+                        "file:/app/frontend-dist/"
+                );
     }
 }

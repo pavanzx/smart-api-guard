@@ -426,3 +426,23 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
     }
 }
+// =====================================================
+// ALLOW FRONTEND
+// =====================================================
+
+String path = request.getRequestURI();
+
+if (path.equals("/")
+        || path.startsWith("/assets/")
+        || path.equals("/favicon.ico")
+        || path.endsWith(".js")
+        || path.endsWith(".css")
+        || path.endsWith(".png")
+        || path.endsWith(".jpg")
+        || path.endsWith(".jpeg")
+        || path.endsWith(".svg")
+        || path.endsWith(".ico")) {
+
+    filterChain.doFilter(request, response);
+    return;
+}
