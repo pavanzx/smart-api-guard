@@ -17,16 +17,45 @@ import PlatformGuide from "./components/PlatformGuide";
 import Footer from "./components/Footer";
 import PageTransition from "./components/PageTransition";
 
-
 import "./App.css";
 
 /* =====================================================
    CONFIG
 ===================================================== */
 
-const API_BASE_URL = "https://smart-api-guard-1.onrender.com";
+const API_BASE_URL =
+  "https://smart-api-guard-1.onrender.com";
 
-const getApiKey = () => localStorage.getItem("smart-api-key");
+/*
+ * Development API key.
+ *
+ * localStorage value takes priority.
+ * If no key exists in localStorage, this key is used.
+ */
+const DEFAULT_API_KEY =
+  "SAG-57KoshfOqtaSTRh6012xcXSqv5U7dtDK";
+
+const getApiKey = () => {
+  return (
+    localStorage.getItem("smart-api-key") ||
+    DEFAULT_API_KEY
+  );
+};
+
+/*
+ * Dashboard refresh configuration.
+ *
+ * IMPORTANT:
+ * Keep this at 60 seconds so the frontend does not
+ * unnecessarily consume the backend FREE-tier limit.
+ */
+const DASHBOARD_REFRESH_INTERVAL = 60000;
+
+/*
+ * Prevent requests from hanging forever.
+ */
+const REQUEST_TIMEOUT = 15000;
+
 const INITIAL_STATS = {
   totalRequests: 0,
   successfulRequests: 0,
@@ -36,7 +65,7 @@ const INITIAL_STATS = {
 };
 
 /* =====================================================
-   SCROLL PATH WOLF
+   SECURITY PATH WOLF
 ===================================================== */
 
 function SecurityPath() {
@@ -78,46 +107,46 @@ function SecurityPath() {
   /* ===================================================
      GET SCROLL PROGRESS
   =================================================== */
-const updateTargetProgress = useCallback(() => {
-  if (!sectionRef.current) return;
 
-  const rect =
-    sectionRef.current.getBoundingClientRect();
+  const updateTargetProgress = useCallback(() => {
+    if (!sectionRef.current) return;
 
-  const viewportHeight = window.innerHeight;
+    const rect =
+      sectionRef.current.getBoundingClientRect();
 
-  // Start only when the section is properly visible
-  const startOffset =
-    viewportHeight * 0.95;
+    const viewportHeight = window.innerHeight;
 
-  // End near the destination
-  const endOffset =
-    viewportHeight * 0.75;
+    const startOffset =
+      viewportHeight * 0.95;
 
-  const start =
-    viewportHeight - startOffset;
+    const endOffset =
+      viewportHeight * 0.75;
 
-  const end =
-    -rect.height + endOffset;
+    const start =
+      viewportHeight - startOffset;
 
-  const travelDistance =
-    start - end;
+    const end =
+      -rect.height + endOffset;
 
-  const travelled =
-    start - rect.top;
+    const travelDistance =
+      start - end;
 
-  let nextProgress =
-    travelled /
-    Math.max(travelDistance, 1);
+    const travelled =
+      start - rect.top;
 
-  nextProgress = Math.max(
-    0,
-    Math.min(1, nextProgress)
-  );
+    let nextProgress =
+      travelled /
+      Math.max(travelDistance, 1);
 
-  targetProgressRef.current =
-    nextProgress;
-}, []);
+    nextProgress = Math.max(
+      0,
+      Math.min(1, nextProgress)
+    );
+
+    targetProgressRef.current =
+      nextProgress;
+  }, []);
+
   /* ===================================================
      SMOOTH WOLF MOTION
   =================================================== */
@@ -136,11 +165,15 @@ const updateTargetProgress = useCallback(() => {
       let next =
         current + difference * 0.115;
 
-      if (Math.abs(difference) < 0.00035) {
+      if (
+        Math.abs(difference) <
+        0.00035
+      ) {
         next = target;
       }
 
-      currentProgressRef.current = next;
+      currentProgressRef.current =
+        next;
 
       setProgress(next);
 
@@ -152,7 +185,9 @@ const updateTargetProgress = useCallback(() => {
       requestAnimationFrame(animate);
 
     return () => {
-      if (animationFrameRef.current) {
+      if (
+        animationFrameRef.current
+      ) {
         cancelAnimationFrame(
           animationFrameRef.current
         );
@@ -200,7 +235,7 @@ const updateTargetProgress = useCallback(() => {
   }, [updateTargetProgress]);
 
   /* ===================================================
-     SVG PATH â†’ EXACT ð“ƒ¦ POSITION
+     SVG PATH POSITION
   =================================================== */
 
   useEffect(() => {
@@ -294,7 +329,6 @@ const updateTargetProgress = useCallback(() => {
       ================================================= */}
 
       <div className="security-path-canvas">
-
         <svg
           className="security-path-svg"
           viewBox="0 0 1000 900"
@@ -347,8 +381,6 @@ const updateTargetProgress = useCallback(() => {
             </filter>
           </defs>
 
-          {/* subtle under-glow */}
-
           <path
             d="
               M 70 80
@@ -367,8 +399,6 @@ const updateTargetProgress = useCallback(() => {
             "
             className="security-path-glow"
           />
-
-          {/* main path */}
 
           <path
             ref={pathRef}
@@ -392,27 +422,21 @@ const updateTargetProgress = useCallback(() => {
           />
         </svg>
 
-        {/* =================================================
-            START DOT
-        ================================================= */}
+        {/* START DOT */}
 
         <div
           className="security-path-dot security-path-start"
           aria-hidden="true"
         />
 
-        {/* =================================================
-            END DOT
-        ================================================= */}
+        {/* END DOT */}
 
         <div
           className="security-path-dot security-path-end"
           aria-hidden="true"
         />
 
-        {/* =================================================
-            ð“ƒ¦ SCROLL PATH GUARD
-        ================================================= */}
+        {/* SCROLL PATH GUARD */}
 
         <div
           ref={wolfRef}
@@ -423,22 +447,14 @@ const updateTargetProgress = useCallback(() => {
 
           <div className="scroll-wolf-energy-ring" />
 
-          {/* =================================================
-              SVG REMOVED
-
-              CUSTOM ð“ƒ¦ CHARACTER
-          ================================================= */}
-
           <span className="scroll-wolf-glyph">
-            ð“ƒ¦
+            𓃦
           </span>
 
           <div className="scroll-wolf-core" />
         </div>
 
-        {/* =================================================
-            STEP MARKERS
-        ================================================= */}
+        {/* STEP MARKERS */}
 
         {protectionSteps.map((step) => {
           const active =
@@ -468,7 +484,6 @@ const updateTargetProgress = useCallback(() => {
       ================================================= */}
 
       <div className="dashboard-page-navigation">
-
         <button
           type="button"
           onClick={() =>
@@ -487,7 +502,7 @@ const updateTargetProgress = useCallback(() => {
             Dashboard
           </span>
 
-          <b>â†’</b>
+          <b>→</b>
         </button>
 
         <button
@@ -508,7 +523,7 @@ const updateTargetProgress = useCallback(() => {
             API Keys
           </span>
 
-          <b>â†’</b>
+          <b>→</b>
         </button>
 
         <button
@@ -529,7 +544,7 @@ const updateTargetProgress = useCallback(() => {
             Request Monitor
           </span>
 
-          <b>â†’</b>
+          <b>→</b>
         </button>
 
         <button
@@ -550,7 +565,7 @@ const updateTargetProgress = useCallback(() => {
             Analytics
           </span>
 
-          <b>â†’</b>
+          <b>→</b>
         </button>
       </div>
     </section>
@@ -607,6 +622,35 @@ function App() {
   const [lastUpdated, setLastUpdated] =
     useState(null);
 
+  /*
+   * Prevent duplicate dashboard requests.
+   *
+   * If React, a button click, or another event tries
+   * to start another refresh while one is already
+   * running, the existing request is reused.
+   */
+  const dashboardRequestRef =
+    useRef(null);
+
+  /*
+   * Stores the current refresh timer.
+   */
+  const dashboardRefreshTimerRef =
+    useRef(null);
+
+  /*
+   * Prevents state updates after the component
+   * has been unmounted.
+   */
+  const dashboardMountedRef =
+    useRef(false);
+
+  /*
+   * Helps prevent accidental rapid refreshes.
+   */
+  const lastDashboardFetchRef =
+    useRef(0);
+
   /* ===================================================
      THEME
   =================================================== */
@@ -621,7 +665,32 @@ function App() {
     });
 
   /* ===================================================
-     LOGIN â†’ DASHBOARD
+     COMPONENT MOUNT TRACKING
+  =================================================== */
+
+  useEffect(() => {
+    dashboardMountedRef.current =
+      true;
+
+    return () => {
+      dashboardMountedRef.current =
+        false;
+
+      if (
+        dashboardRefreshTimerRef.current
+      ) {
+        clearTimeout(
+          dashboardRefreshTimerRef.current
+        );
+
+        dashboardRefreshTimerRef.current =
+          null;
+      }
+    };
+  }, []);
+
+  /* ===================================================
+     LOGIN → DASHBOARD
   =================================================== */
 
   const handleAuthenticated =
@@ -641,7 +710,8 @@ function App() {
         setShowDashboardArrival(false);
       }, 900);
 
-      return () => clearTimeout(timer);
+      return () =>
+        clearTimeout(timer);
     }, []);
 
   /* ===================================================
@@ -658,6 +728,20 @@ function App() {
       setActivePage("dashboard");
       setOnline(false);
       setShowDashboardArrival(false);
+
+      /*
+       * Stop any scheduled refresh immediately.
+       */
+      if (
+        dashboardRefreshTimerRef.current
+      ) {
+        clearTimeout(
+          dashboardRefreshTimerRef.current
+        );
+
+        dashboardRefreshTimerRef.current =
+          null;
+      }
     }, []);
 
   /* ===================================================
@@ -665,143 +749,477 @@ function App() {
   =================================================== */
 
   const fetchDashboardData =
-    useCallback(async () => {
-      setLoading(true);
+    useCallback(async ({
+      force = false,
+    } = {}) => {
+      /*
+       * -------------------------------------------------
+       * DUPLICATE REQUEST PROTECTION
+       * -------------------------------------------------
+       */
 
-      /* -----------------------------------------------
-         HEALTH CHECK
-      ----------------------------------------------- */
-
-      try {
-        const healthResponse =
-          await fetch(
-            `${API_BASE_URL}/api/keys`,
-            {
-              method: "GET",
-              headers: {
-                "X-API-KEY": getApiKey() || "",
-                Accept:
-                  "application/json",
-              },
-            }
-          );
-
-        if (!healthResponse.ok) {
-          throw new Error(
-            `Backend health check failed: ${healthResponse.status}`
-          );
-        }
-
-        setOnline(true);
-      } catch (error) {
-        console.error(
-          "Smart API Guard health check failed:",
-          error
+      if (
+        dashboardRequestRef.current
+      ) {
+        console.log(
+          "[Smart API Guard] Dashboard request already running. Skipping duplicate request."
         );
 
-        setOnline(false);
-        setLoading(false);
+        return dashboardRequestRef.current;
+      }
+
+      /*
+       * -------------------------------------------------
+       * RAPID REFRESH PROTECTION
+       * -------------------------------------------------
+       *
+       * A forced manual refresh can bypass this check,
+       * but it still cannot create a second simultaneous
+       * request.
+       */
+
+      const now = Date.now();
+
+      if (
+        !force &&
+        now -
+          lastDashboardFetchRef.current <
+          5000
+      ) {
+        console.log(
+          "[Smart API Guard] Dashboard refresh skipped because the previous refresh was too recent."
+        );
 
         return;
       }
 
-      /* -----------------------------------------------
-         STATS
-      ----------------------------------------------- */
+      /*
+       * -------------------------------------------------
+       * MAIN REQUEST
+       * -------------------------------------------------
+       */
+
+      const requestPromise =
+        (async () => {
+          if (
+            !dashboardMountedRef.current
+          ) {
+            return;
+          }
+
+          setLoading(true);
+
+          const apiKey = getApiKey();
+
+          if (!apiKey) {
+            console.error(
+              "[Smart API Guard] API key is missing."
+            );
+
+            if (
+              dashboardMountedRef.current
+            ) {
+              setOnline(false);
+              setLoading(false);
+            }
+
+            return;
+          }
+
+          /*
+           * -------------------------------------------------
+           * REQUEST HELPER WITH TIMEOUT
+           * -------------------------------------------------
+           */
+
+          const fetchWithTimeout =
+            async (
+              url,
+              options = {}
+            ) => {
+              const controller =
+                new AbortController();
+
+              const timeoutId =
+                setTimeout(() => {
+                  controller.abort();
+                }, REQUEST_TIMEOUT);
+
+              try {
+                const response =
+                  await fetch(
+                    url,
+                    {
+                      ...options,
+                      signal:
+                        controller.signal,
+                    }
+                  );
+
+                /*
+                 * Rate-limit information is read from
+                 * the response headers.
+                 *
+                 * Reading headers does NOT create
+                 * another API request.
+                 */
+
+                const limit =
+                  response.headers.get(
+                    "x-ratelimit-limit"
+                  );
+
+                const remaining =
+                  response.headers.get(
+                    "x-ratelimit-remaining"
+                  );
+
+                const tier =
+                  response.headers.get(
+                    "x-api-tier"
+                  );
+
+                if (
+                  limit ||
+                  remaining ||
+                  tier
+                ) {
+                  console.log(
+                    "[Smart API Guard] Rate limit:",
+                    {
+                      tier,
+                      limit,
+                      remaining,
+                    }
+                  );
+                }
+
+                return response;
+              } finally {
+                clearTimeout(
+                  timeoutId
+                );
+              }
+            };
+
+          const headers = {
+            "X-API-KEY": apiKey,
+            Accept:
+              "application/json",
+          };
+
+          /*
+           * -------------------------------------------------
+           * 1. USAGE STATS
+           * -------------------------------------------------
+           *
+           * IMPORTANT FIX:
+           *
+           * The OLD code first called:
+           *
+           *     GET /api/keys
+           *
+           * just to test the API connection.
+           *
+           * That was unnecessary and consumed one request.
+           *
+           * Now /api/usage/stats itself acts as the
+           * connection/authentication check.
+           */
+
+          let statsSuccessful = false;
+
+          try {
+            const statsResponse =
+              await fetchWithTimeout(
+                `${API_BASE_URL}/api/usage/stats`,
+                {
+                  method: "GET",
+                  headers,
+                }
+              );
+
+            /*
+             * -------------------------------------------------
+             * RATE LIMITED
+             * -------------------------------------------------
+             */
+
+            if (
+              statsResponse.status ===
+              429
+            ) {
+              console.warn(
+                "[Smart API Guard] Rate limit reached (429). Dashboard refresh stopped."
+              );
+
+              if (
+                dashboardMountedRef.current
+              ) {
+                setOnline(false);
+                setLoading(false);
+              }
+
+              return;
+            }
+
+            /*
+             * -------------------------------------------------
+             * AUTHENTICATION FAILURE
+             * -------------------------------------------------
+             */
+
+            if (
+              statsResponse.status ===
+                401 ||
+              statsResponse.status ===
+                403
+            ) {
+              console.warn(
+                `[Smart API Guard] API authentication failed: ${statsResponse.status}`
+              );
+
+              if (
+                dashboardMountedRef.current
+              ) {
+                setOnline(false);
+                setLoading(false);
+              }
+
+              return;
+            }
+
+            /*
+             * -------------------------------------------------
+             * OTHER SERVER ERROR
+             * -------------------------------------------------
+             */
+
+            if (!statsResponse.ok) {
+              throw new Error(
+                `Stats endpoint returned ${statsResponse.status}`
+              );
+            }
+
+            const statsData =
+              await statsResponse.json();
+
+            statsSuccessful = true;
+
+            if (
+              dashboardMountedRef.current
+            ) {
+              setStats({
+                totalRequests:
+                  statsData.totalRequests ??
+                  0,
+
+                successfulRequests:
+                  statsData.successfulRequests ??
+                  0,
+
+                blockedRequests:
+                  statsData.blockedRequests ??
+                  0,
+
+                unauthorizedRequests:
+                  statsData.unauthorizedRequests ??
+                  0,
+
+                rateLimitedRequests:
+                  statsData.rateLimitedRequests ??
+                  0,
+              });
+
+              setOnline(true);
+            }
+          } catch (error) {
+            if (
+              error?.name ===
+              "AbortError"
+            ) {
+              console.warn(
+                "[Smart API Guard] Stats request timed out."
+              );
+            } else {
+              console.warn(
+                "[Smart API Guard] Unable to load usage statistics:",
+                error
+              );
+            }
+
+            if (
+              dashboardMountedRef.current
+            ) {
+              setOnline(false);
+              setLoading(false);
+            }
+
+            return;
+          }
+
+          /*
+           * -------------------------------------------------
+           * 2. RECENT REQUESTS
+           * -------------------------------------------------
+           */
+
+          try {
+            const recentResponse =
+              await fetchWithTimeout(
+                `${API_BASE_URL}/api/usage/recent`,
+                {
+                  method: "GET",
+                  headers,
+                }
+              );
+
+            /*
+             * If this endpoint is rate limited,
+             * do NOT retry immediately.
+             *
+             * Stats already succeeded, so the backend
+             * itself is still reachable.
+             */
+
+            if (
+              recentResponse.status ===
+              429
+            ) {
+              console.warn(
+                "[Smart API Guard] Recent requests endpoint is rate limited."
+              );
+
+              if (
+                dashboardMountedRef.current
+              ) {
+                setOnline(
+                  statsSuccessful
+                );
+
+                setLoading(false);
+              }
+
+              return;
+            }
+
+            /*
+             * Authentication failure.
+             */
+
+            if (
+              recentResponse.status ===
+                401 ||
+              recentResponse.status ===
+                403
+            ) {
+              console.warn(
+                `[Smart API Guard] Recent requests authentication failed: ${recentResponse.status}`
+              );
+
+              if (
+                dashboardMountedRef.current
+              ) {
+                setOnline(false);
+                setLoading(false);
+              }
+
+              return;
+            }
+
+            /*
+             * Other recent endpoint errors.
+             *
+             * We do not mark the whole API offline because
+             * the stats endpoint already succeeded.
+             */
+
+            if (!recentResponse.ok) {
+              console.warn(
+                `[Smart API Guard] Recent endpoint returned ${recentResponse.status}`
+              );
+            } else {
+              const recentData =
+                await recentResponse.json();
+
+              if (
+                dashboardMountedRef.current
+              ) {
+                setRequests(
+                  Array.isArray(
+                    recentData
+                  )
+                    ? recentData
+                    : []
+                );
+              }
+            }
+          } catch (error) {
+            if (
+              error?.name ===
+              "AbortError"
+            ) {
+              console.warn(
+                "[Smart API Guard] Recent requests request timed out."
+              );
+            } else {
+              console.warn(
+                "[Smart API Guard] Unable to load recent requests:",
+                error
+              );
+            }
+          }
+
+          /*
+           * -------------------------------------------------
+           * FINISH
+           * -------------------------------------------------
+           */
+
+          lastDashboardFetchRef.current =
+            Date.now();
+
+          if (
+            dashboardMountedRef.current
+          ) {
+            setOnline(true);
+
+            setLastUpdated(
+              new Date()
+            );
+
+            setLoading(false);
+          }
+        })();
+
+      /*
+       * Save the currently running promise.
+       *
+       * Any second call will reuse this promise instead
+       * of creating another HTTP request.
+       */
+
+      dashboardRequestRef.current =
+        requestPromise;
 
       try {
-        const statsResponse =
-          await fetch(
-            `${API_BASE_URL}/api/usage/stats`,
-            {
-              method: "GET",
-              headers: {
-                "X-API-KEY": getApiKey() || "",
-                Accept:
-                  "application/json",
-              },
-            }
-          );
+        await requestPromise;
+      } finally {
+        /*
+         * Only clear the reference if it still points
+         * to this exact request.
+         */
 
-        if (!statsResponse.ok) {
-          console.warn(
-            `Stats endpoint returned ${statsResponse.status}`
-          );
-        } else {
-          const statsData =
-            await statsResponse.json();
-
-          setStats({
-            totalRequests:
-              statsData.totalRequests ??
-              0,
-
-            successfulRequests:
-              statsData.successfulRequests ??
-              0,
-
-            blockedRequests:
-              statsData.blockedRequests ??
-              0,
-
-            unauthorizedRequests:
-              statsData.unauthorizedRequests ??
-              0,
-
-            rateLimitedRequests:
-              statsData.rateLimitedRequests ??
-              0,
-          });
+        if (
+          dashboardRequestRef.current ===
+          requestPromise
+        ) {
+          dashboardRequestRef.current =
+            null;
         }
-      } catch (error) {
-        console.warn(
-          "Unable to load usage statistics:",
-          error
-        );
       }
 
-      /* -----------------------------------------------
-         RECENT REQUESTS
-      ----------------------------------------------- */
-
-      try {
-        const recentResponse =
-          await fetch(
-            `${API_BASE_URL}/api/usage/recent`,
-            {
-              method: "GET",
-              headers: {
-                "X-API-KEY": getApiKey() || "",
-                Accept:
-                  "application/json",
-              },
-            }
-          );
-
-        if (!recentResponse.ok) {
-          console.warn(
-            `Recent endpoint returned ${recentResponse.status}`
-          );
-        } else {
-          const recentData =
-            await recentResponse.json();
-
-          setRequests(
-            Array.isArray(recentData)
-              ? recentData
-              : []
-          );
-        }
-      } catch (error) {
-        console.warn(
-          "Unable to load recent requests:",
-          error
-        );
-      }
-
-      setOnline(true);
-      setLastUpdated(new Date());
-      setLoading(false);
+      return requestPromise;
     }, []);
 
   /* ===================================================
@@ -809,34 +1227,127 @@ function App() {
   =================================================== */
 
   useEffect(() => {
-    if (appScreen !== "dashboard") {
+    /*
+     * Only run dashboard polling while the dashboard
+     * application screen is active.
+     */
+
+    if (
+      appScreen !== "dashboard"
+    ) {
+      if (
+        dashboardRefreshTimerRef.current
+      ) {
+        clearTimeout(
+          dashboardRefreshTimerRef.current
+        );
+
+        dashboardRefreshTimerRef.current =
+          null;
+      }
+
       return undefined;
     }
 
     let cancelled = false;
-    let timeoutId = null;
 
-    const refresh = async () => {
-      if (cancelled) return;
+    const scheduleNextRefresh =
+      () => {
+        if (
+          cancelled ||
+          !dashboardMountedRef.current
+        ) {
+          return;
+        }
 
-      await fetchDashboardData();
-
-      if (!cancelled) {
-        timeoutId =
-          setTimeout(
-            refresh,
-            5000
+        if (
+          dashboardRefreshTimerRef.current
+        ) {
+          clearTimeout(
+            dashboardRefreshTimerRef.current
           );
-      }
-    };
+        }
 
-    refresh();
+        dashboardRefreshTimerRef.current =
+          setTimeout(
+            async () => {
+              if (
+                cancelled ||
+                !dashboardMountedRef.current
+              ) {
+                return;
+              }
+
+              await fetchDashboardData();
+
+              if (
+                cancelled ||
+                !dashboardMountedRef.current
+              ) {
+                return;
+              }
+
+              scheduleNextRefresh();
+            },
+            DASHBOARD_REFRESH_INTERVAL
+          );
+      };
+
+    const startRefresh =
+      async () => {
+        if (
+          cancelled ||
+          !dashboardMountedRef.current
+        ) {
+          return;
+        }
+
+        /*
+         * If another effect already started a request
+         * (for example React StrictMode in development),
+         * wait for it instead of starting another request.
+         */
+
+        if (
+          dashboardRequestRef.current
+        ) {
+          console.log(
+            "[Smart API Guard] Waiting for existing dashboard request."
+          );
+
+          try {
+            await dashboardRequestRef.current;
+          } catch {
+            // Request errors are already handled internally.
+          }
+        } else {
+          await fetchDashboardData();
+        }
+
+        if (
+          cancelled ||
+          !dashboardMountedRef.current
+        ) {
+          return;
+        }
+
+        scheduleNextRefresh();
+      };
+
+    startRefresh();
 
     return () => {
       cancelled = true;
 
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
+      if (
+        dashboardRefreshTimerRef.current
+      ) {
+        clearTimeout(
+          dashboardRefreshTimerRef.current
+        );
+
+        dashboardRefreshTimerRef.current =
+          null;
       }
     };
   }, [
@@ -977,9 +1488,7 @@ function App() {
 
         <PlatformGuide />
 
-        {/* =================================================
-            API GATEWAY
-        ================================================= */}
+        {/* API GATEWAY */}
 
         <section className="welcome">
           <div>
@@ -1016,12 +1525,19 @@ function App() {
                   ? "refreshing"
                   : ""
               }`}
-              onClick={
-                fetchDashboardData
+              onClick={() =>
+                fetchDashboardData({
+                  force: true,
+                })
               }
-              disabled={loading}
+              disabled={
+                loading ||
+                Boolean(
+                  dashboardRequestRef.current
+                )
+              }
             >
-              <span>â†»</span>
+              <span>↻</span>
 
               {loading
                 ? "Refreshing..."
@@ -1030,9 +1546,7 @@ function App() {
           </div>
         </section>
 
-        {/* =================================================
-            CONNECTION ERROR
-        ================================================= */}
+        {/* CONNECTION ERROR */}
 
         {!online &&
           !loading && (
@@ -1048,32 +1562,40 @@ function App() {
                 </strong>
 
                 <span>
-                  Make sure Spring Boot
-                  is running on port 8080.
+                  Check your Render backend
+                  and API key.
                 </span>
               </div>
 
               <button
                 type="button"
                 className="error-retry"
-                onClick={
-                  fetchDashboardData
+                onClick={() =>
+                  fetchDashboardData({
+                    force: true,
+                  })
+                }
+                disabled={
+                  loading ||
+                  Boolean(
+                    dashboardRequestRef.current
+                  )
                 }
               >
-                Retry
+                {loading
+                  ? "Retrying..."
+                  : "Retry"}
               </button>
             </div>
           )}
 
-        {/* =================================================
-            STATISTICS
-        ================================================= */}
+        {/* STATISTICS */}
 
         <section className="stats-grid">
           {renderStatCard({
             cardClass:
               "blue-card",
-            icon: "â†—",
+            icon: "↗",
             trend: "LIVE",
             label:
               "Total Requests",
@@ -1084,7 +1606,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "green-card",
-            icon: "âœ“",
+            icon: "✓",
             trend:
               "HEALTHY",
             label:
@@ -1108,7 +1630,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "red-card",
-            icon: "ðŸ”’",
+            icon: "🔒",
             trend:
               "SECURITY",
             label:
@@ -1120,7 +1642,7 @@ function App() {
           {renderStatCard({
             cardClass:
               "purple-card",
-            icon: "âš¡",
+            icon: "⚡",
             trend:
               "LIMIT",
             label:
@@ -1130,12 +1652,9 @@ function App() {
           })}
         </section>
 
-        {/* =================================================
-            DASHBOARD NAVIGATION
-        ================================================= */}
+        {/* DASHBOARD NAVIGATION */}
 
         <section className="dashboard-command-navigation">
-
           <div className="command-navigation-header">
             <span className="eyebrow">
               SECURITY MODULES
@@ -1153,14 +1672,11 @@ function App() {
           </div>
 
           <div className="command-navigation-grid">
-
             <button
               type="button"
               className="command-navigation-card"
               onClick={() =>
-                setActivePage(
-                  "keys"
-                )
+                setActivePage("keys")
               }
             >
               <span className="command-card-number">
@@ -1178,7 +1694,7 @@ function App() {
                 </span>
               </div>
 
-              <b>â†’</b>
+              <b>→</b>
             </button>
 
             <button
@@ -1205,7 +1721,7 @@ function App() {
                 </span>
               </div>
 
-              <b>â†’</b>
+              <b>→</b>
             </button>
 
             <button
@@ -1232,9 +1748,8 @@ function App() {
                 </span>
               </div>
 
-              <b>â†’</b>
+              <b>→</b>
             </button>
-
           </div>
         </section>
 
@@ -1375,7 +1890,6 @@ function App() {
   return (
     <>
       <div className="app-layout">
-
         <AnimatedBackground
           page={activePage}
         />
@@ -1398,11 +1912,9 @@ function App() {
         {/* MAIN CONTENT */}
 
         <div className="main-content">
-
           {/* TOPBAR */}
 
           <header className="topbar">
-
             <div className="topbar-title">
               <div className="breadcrumb">
                 SECURITY / MONITORING
@@ -1428,7 +1940,6 @@ function App() {
             </div>
 
             <div className="topbar-right">
-
               {/* CONNECTION */}
 
               <div
@@ -1466,8 +1977,8 @@ function App() {
                   }
                 >
                   {darkMode
-                    ? "â˜€"
-                    : "â˜¾"}
+                    ? "☀"
+                    : "☾"}
                 </span>
               </button>
 
@@ -1488,7 +1999,7 @@ function App() {
                 title="Logout"
                 aria-label="Logout"
               >
-                âŽ‹
+                ⎋
               </button>
             </div>
           </header>
@@ -1512,7 +2023,7 @@ function App() {
               <span>
                 <span className="footer-status" />
 
-                Smart API Guard Â·
+                Smart API Guard ·
                 Monitoring active
               </span>
 
@@ -1530,7 +2041,7 @@ function App() {
       </div>
 
       {/* =================================================
-          0.9 SECOND ð“ƒ¦ ARRIVAL
+          DASHBOARD ARRIVAL
       ================================================= */}
 
       {showDashboardArrival && (
@@ -1538,25 +2049,16 @@ function App() {
           className="dashboard-arrival"
           aria-hidden="true"
         >
-
-          {/* Dashboard cover */}
-
           <div className="arrival-cover" />
-
-          {/* Blue reveal line */}
 
           <div className="arrival-reveal-line" />
 
-          {/* ð“ƒ¦ */}
-
           <div className="arrival-wolf">
-
             <div className="arrival-wolf-aura" />
 
             <span>
-              ð“ƒ¦
+              𓃦
             </span>
-
           </div>
         </div>
       )}
@@ -1862,7 +2364,6 @@ function App() {
           }
         }
 
-
         /* =================================================
            SECURITY PATH
         ================================================= */
@@ -2098,7 +2599,7 @@ function App() {
         }
 
         /* =================================================
-           ð“ƒ¦ SCROLL PATH WOLF
+           SCROLL PATH WOLF
         ================================================= */
 
         .scroll-path-wolf {
@@ -2124,12 +2625,6 @@ function App() {
 
           isolation: isolate;
         }
-
-        /* =================================================
-           ð“ƒ¦ CHARACTER
-
-           SVG WOLF COMPLETELY REMOVED.
-        ================================================= */
 
         .scroll-wolf-glyph {
           position: relative;
@@ -2354,7 +2849,7 @@ function App() {
         }
 
         /* =================================================
-           ð“ƒ¦ FLOAT ANIMATION
+           FLOAT ANIMATION
         ================================================= */
 
         @keyframes scrollWolfFloat {
